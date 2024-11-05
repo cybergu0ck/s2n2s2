@@ -33,6 +33,7 @@ REGISTERED_WHATSAPP_NUMBER = 10
 HEADER_ENCODING = {
     "Receipt Number": RECEIPT_NUMBER,
     "Receipt Date": RECEIPT_DATE,
+    "Title": REGISTERED_TITLE,
     "Name": REGISTERED_NAME,
     "Date": REGISTERED_DATE,
     "Gotra": REGISTERED_GOTRA,
@@ -108,6 +109,7 @@ def send_whatsapp_text(text, number):
 
 # Business Logic
 def main():
+    # TODO - Add exception handling and in the case of exception send fail log to admin number
     gc = gspread.service_account()
     sheet = gc.open(GOOGLE_SHEETS_TITLE)
     worksheet = sheet.sheet1
