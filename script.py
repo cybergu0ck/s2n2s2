@@ -14,6 +14,8 @@ from twilio.rest import Client
 
 
 # Global Variables
+GOOGLE_SHEETS_TITLE = "s2n2s2-db"
+
 TODAY = datetime.today().strftime("%d/%m/%Y")
 HEADER_ROW = 1
 
@@ -39,7 +41,6 @@ HEADER_ENCODING = {
     "Phone Number": REGISTERED_PHONE_NUMBER,
     "Whatsapp Number": REGISTERED_WHATSAPP_NUMBER,
 }
-
 
 # NOTE - The creds are stored as env variables
 TWILIO_ACC_SSID = os.getenv("TWILIO_ACC_SSID")
@@ -108,7 +109,7 @@ def send_whatsapp_text(text, number):
 # Business Logic
 def main():
     gc = gspread.service_account()
-    sheet = gc.open("s2n2s2-db")
+    sheet = gc.open(GOOGLE_SHEETS_TITLE)
     worksheet = sheet.sheet1
     encoded_header_to_id = get_encoded_header_id_map(worksheet)
     recipients = get_todays_recepients(worksheet, encoded_header_to_id)
