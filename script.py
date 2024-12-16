@@ -91,10 +91,17 @@ def get_custom_message(**kwargs):
     """
     Returns the custom text for the input parameters
     """
+
     res = f"Namasthe {kwargs.get('title')} {kwargs.get('name')}, Greetings from Naalur. As per Receipt Number {kwargs.get('receipt_num')}, dated {kwargs.get('receipt_date')}, Pooje has been done in the name of {kwargs.get('name')} of {kwargs.get('gotra')} Gotra, {kwargs.get('nakshatra')} Nakshtra, {kwargs.get('rashi')} Rashi. May the blessings of Naalur Devasthana always be with you."
 
+    return res
 
-def send_whatsapp_text(text, number):
+
+def get_simple_message():
+    return "Dear devotee of Lord Nalur Shankara Narayana Swamy, your Shashwatha Pooja Seva is performed today."
+
+
+def send_whatsapp_text(number, text):
     """
     Sends the text over whatsapp to the provided number
     """
@@ -130,6 +137,7 @@ def main():
             ],
             rashi=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_RASHI]],
         )
+
         # TODO - Similarly send sms text
 
 
