@@ -7,7 +7,6 @@
 import gspread
 from datetime import datetime
 import os
-from twilio.rest import Client
 
 
 # DEVNOTE - Choosing not to create a class (atleast in this stage) and proceeding with global variables and global utility functions to keep it simple and functional.
@@ -42,10 +41,6 @@ HEADER_ENCODING = {
     "Phone Number": REGISTERED_PHONE_NUMBER,
     "Whatsapp Number": REGISTERED_WHATSAPP_NUMBER,
 }
-
-# NOTE - The creds are stored as env variables
-TWILIO_ACC_SSID = os.getenv("TWILIO_ACC_SSID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 
 
 # Global Functions
@@ -97,14 +92,7 @@ def send_whatsapp_text(text, number):
     """
     Sends the text over whatsapp to the provided number
     """
-    account_sid = TWILIO_ACC_SSID
-    auth_token = TWILIO_AUTH_TOKEN
-    client = Client(account_sid, auth_token)
-    message = client.messages.create(
-        body=text,
-        from_="whatsapp:+14155238886",
-        to="whatsapp:+" + number,
-    )
+    #STUB - Work on this once the communication over sms is made stable
 
 
 # Business Logic
@@ -127,7 +115,6 @@ def main():
             nakshatra=recipient[encoded_header_to_id[REGISTERED_NAKSHATRA]],
             rashi=recipient[encoded_header_to_id[REGISTERED_RASHI]],
         )
-        send_whatsapp_text(custom_message, whatsapp_num)
         # TODO - Similarly send sms text
 
 
