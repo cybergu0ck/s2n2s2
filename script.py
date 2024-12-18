@@ -6,13 +6,16 @@
 """
 DEV NOTES:
 
-Keep the code simple and donot introduce unnecesary classes.
-Add exception handling and in the case of exception send fail log to admin number
+NOTE - Keep the code simple and donot introduce unnecesary classes.
+TODO - Add exception handling and in the case of exception send fail log to admin number
+TODO - Add sim center number in the code
 """
 
 
 import gspread
 import os
+import serial
+import time
 from datetime import datetime
 from enum import Enum, auto
 
@@ -46,6 +49,13 @@ sheetsheader_to_internalreference = {
     "Phone Number": SheetsHeader.REGISTERED_PHONE_NUMBER,
     "Whatsapp Number": SheetsHeader.REGISTERED_WHATSAPP_NUMBER,
 }
+
+PORT = "/dev/ttyS0"
+BAUD_RATE = 115200
+TIME_OUT = 1
+SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, TIME_OUT=TIME_OUT)
+
+DEV_MODE = True
 
 
 def is_valid_date(value):
@@ -93,12 +103,44 @@ def get_custom_message(**kwargs):
     """
 
     res = f"Namasthe {kwargs.get('title')} {kwargs.get('name')}, Greetings from Naalur. As per Receipt Number {kwargs.get('receipt_num')}, dated {kwargs.get('receipt_date')}, Pooje has been done in the name of {kwargs.get('name')} of {kwargs.get('gotra')} Gotra, {kwargs.get('nakshatra')} Nakshtra, {kwargs.get('rashi')} Rashi. May the blessings of Naalur Devasthana always be with you."
-
     return res
 
 
 def get_simple_message():
     return "Dear devotee of Lord Nalur Shankara Narayana Swamy, your Shashwatha Pooja Seva is performed today."
+
+
+def configure_serial(SERRIAL_OBJECT):
+    SERRIAL_OBJECT.write(b"AT+CMGF=1\r")  # Set the SMS message format to text mode
+    user_command = SERRIAL_OBJECT.readline().decode().strip()  # Read the echoed command
+    if DEV_MODE:
+        print(f"\nuser command : {user_command}")
+
+    response = SERRIAL_OBJECT.readline().decode().strip()  # Read the actual response
+    if DEV_MODE:
+        print(f"response : {response}\n")
+
+
+def send_sms_text(recipient_phone_number, sms_message):
+    SERRIAL_OBJECT.write(f'AT+CMGS="{recipient_phone_number}"\r'.encode())
+    user_command = SERRIAL_OBJECT.readline().decode().strip()
+    if DEV_MODE:
+        print(f"\nuser command : {user_command}")
+    response = SERRIAL_OBJECT.readline().decode().strip()
+    if DEV_MODE:
+        print(f"response : {response}\n")
+
+    SERRIAL_OBJECT.write(
+        f"{sms_message}\x1A".encode()
+    )  # \x1A is the ASCII code for Ctrl+Z
+    user_command = SERRIAL_OBJECT.readline().decode().strip()
+    if DEV_MODE:
+        print(f"\nuser command : {user_command}")
+    response = SERRIAL_OBJECT.readline().decode().strip()
+    if DEV_MODE:
+        print(f"response : {response}\n")
+
+    time.sleep(5)
 
 
 def send_whatsapp_text(number, text):
@@ -115,30 +157,35 @@ def main():
 
     internalheader_to_columnid = get_internalheader_to_columnid(worksheet)
     recipients = get_todays_recepients(worksheet, internalheader_to_columnid)
-    for recipient in recipients:
-        phone_num = recipient[
-            internalheader_to_columnid[SheetsHeader.REGISTERED_PHONE_NUMBER]
-        ]
-        whatsapp_num = recipient[
-            internalheader_to_columnid[SheetsHeader.REGISTERED_WHATSAPP_NUMBER]
-        ]
-        custom_message = get_custom_message(
-            title=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_TITLE]],
-            name=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME]],
-            receipt_num=recipient[
-                internalheader_to_columnid[SheetsHeader.RECEIPT_NUMBER]
-            ],
-            receipt_date=recipient[
-                internalheader_to_columnid[SheetsHeader.REGISTERED_DATE]
-            ],
-            gotra=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_GOTRA]],
-            nakshatra=recipient[
-                internalheader_to_columnid[SheetsHeader.REGISTERED_NAKSHATRA]
-            ],
-            rashi=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_RASHI]],
-        )
 
-        # TODO - Similarly send sms text
+    for recipient in recipients:
+        phone_num = (
+            "+91"
+            + recipient[
+                internalheader_to_columnid[SheetsHeader.REGISTERED_PHONE_NUMBER]
+            ]
+        )
+        # whatsapp_num = recipient[
+        #    internalheader_to_columnid[SheetsHeader.REGISTERED_WHATSAPP_NUMBER] - 1
+        # ]
+        # custom_message = get_custom_message(
+        #     title=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_TITLE]],
+        #     name=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME]],
+        #     receipt_num=recipient[
+        #         internalheader_to_columnid[SheetsHeader.RECEIPT_NUMBER]
+        #     ],
+        #     receipt_date=recipient[
+        #         internalheader_to_columnid[SheetsHeader.REGISTERED_DATE]
+        #     ],
+        #     gotra=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_GOTRA]],
+        #     nakshatra=recipient[
+        #         internalheader_to_columnid[SheetsHeader.REGISTERED_NAKSHATRA]
+        #     ],
+        #     rashi=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_RASHI]],
+        # )
+        simple_message = get_simple_message()
+        send_sms_text(phone_num, simple_message)
+        print("job done")
 
 
 if __name__ == "__main__":
