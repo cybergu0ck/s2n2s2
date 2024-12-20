@@ -31,6 +31,7 @@ Flask==3.0.3
 fonttools==4.41.1
 fqdn==1.5.1
 frozenlist==1.5.0
+future==1.0.0
 google-auth==2.35.0
 google-auth-oauthlib==1.2.1
 gspread==6.1.4
@@ -40,6 +41,7 @@ iniconfig==2.0.0
 ipykernel==6.23.1
 ipython==8.14.0
 ipython-genutils==0.2.0
+iso8601==2.1.0
 isoduration==20.11.0
 itsdangerous==2.2.0
 jedi==0.18.2
@@ -97,6 +99,7 @@ pyperclip==1.8.2
 PyRect==0.2.0
 pyrsistent==0.19.3
 PyScreeze==0.1.30
+pyserial==3.5
 PySocks==1.7.1
 pytest==7.4.0
 pytest-cov==4.1.0
