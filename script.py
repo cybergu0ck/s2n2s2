@@ -31,9 +31,11 @@ TIME_OUT = 1
 SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 LOG_DIR_NAME = "logs"
+DEV_LOG_DIR_NAME = "dev-logs"
+ADMIN_LOG_DIR_NAME = "admin-logs"
 LOG_FILE_EXTENSION = ".log"
 PATH_TO_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PATH_TO_LOG_DIR = os.path.join(PATH_TO_SCRIPT_DIR, LOG_DIR_NAME)
+LOGGER = logging.getLogger()
 
 DEV_MODE = True
 
@@ -79,36 +81,65 @@ def increment_filename(filename):
     return res
 
 
-def get_new_filename(filename):
+def get_new_filename(filename, is_dev):
     res = increment_filename(filename)
-    path_to_new_filename = os.path.join(PATH_TO_LOG_DIR, res + LOG_FILE_EXTENSION)
+    path = PATH_TO_DEV_LOG_DIR if is_dev else PATH_TO_ADMIN_LOG_DIR
+    path_to_new_filename = os.path.join(path, res + LOG_FILE_EXTENSION)
     if os.path.exists(path_to_new_filename):
-        return get_new_filename(res)
+        return get_new_filename(res, is_dev)
     return res
 
 
-def get_logfile_path():
-    path_to_log_file = os.path.join(
-        PATH_TO_LOG_DIR, f"{TODAY_FOR_LOG}{LOG_FILE_EXTENSION}"
-    )
+def get_logfile_path(is_dev):
+    path = PATH_TO_DEV_LOG_DIR if is_dev else PATH_TO_ADMIN_LOG_DIR
+    path_to_log_file = os.path.join(path, f"{TODAY_FOR_LOG}{LOG_FILE_EXTENSION}")
     if os.path.exists(path_to_log_file):
         filename = str(os.path.basename(path_to_log_file))
-        new_filename = get_new_filename(filename)
-        path_to_log_file = os.path.join(
-            PATH_TO_LOG_DIR, f"{new_filename}{LOG_FILE_EXTENSION}"
-        )
+        new_filename = get_new_filename(filename, is_dev)
+        path_to_log_file = os.path.join(path, f"{new_filename}{LOG_FILE_EXTENSION}")
     return path_to_log_file
 
 
-def configure_logger():
-    os.makedirs(PATH_TO_LOG_DIR, exist_ok=True)
-    logging.basicConfig(
-        filename=get_logfile_path(),
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    logging.info("logger configuration successful")
+def create_log_directories():
+    if not os.path.exists(LOG_DIR_NAME):
+        os.makedirs(LOG_DIR_NAME)
+
+    global PATH_TO_LOG_DIR
+    PATH_TO_LOG_DIR = os.path.join(PATH_TO_SCRIPT_DIR, LOG_DIR_NAME)
+
+    dev_log_dir = os.path.join(PATH_TO_LOG_DIR, DEV_LOG_DIR_NAME)
+    if not os.path.exists(dev_log_dir):
+        os.makedirs(f"{LOG_DIR_NAME}/{DEV_LOG_DIR_NAME}")
+
+    global PATH_TO_DEV_LOG_DIR
+    PATH_TO_DEV_LOG_DIR = os.path.join(PATH_TO_LOG_DIR, DEV_LOG_DIR_NAME)
+
+    admin_log_dir = os.path.join(PATH_TO_LOG_DIR, ADMIN_LOG_DIR_NAME)
+    if not os.path.exists(admin_log_dir):
+        os.makedirs(f"{LOG_DIR_NAME}/{ADMIN_LOG_DIR_NAME}")
+
+    global PATH_TO_ADMIN_LOG_DIR
+    PATH_TO_ADMIN_LOG_DIR = os.path.join(PATH_TO_LOG_DIR, ADMIN_LOG_DIR_NAME)
+
+
+def configure_logging_system():
+    create_log_directories()
+
+    LOGGER.setLevel(logging.DEBUG)
+    LOGGER.debug("Logger configuration successful")
+
+    debug_handler = logging.FileHandler(get_logfile_path(True))
+    debug_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    debug_handler.setFormatter(debug_formatter)
+    debug_handler.setLevel(logging.DEBUG)
+    LOGGER.addHandler(debug_handler)
+
+    info_handler = logging.FileHandler(get_logfile_path(False))
+    info_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    info_handler.setFormatter(info_formatter)
+    info_handler.setLevel(logging.INFO)
+    LOGGER.addHandler(info_handler)
+    LOGGER.debug("Logger system configured successfully")
 
 
 def is_valid_date(value):
@@ -203,17 +234,31 @@ def send_whatsapp_text(number, text):
     # STUB - Work on this once the communication over sms is made stable
 
 
+def log_todays_recipients(recipients):
+    list_of_names = f"""List of recipients:"""
+
+    for recipient in recipients:
+        title = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_TITLE] - 1]
+        name = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME] - 1]
+        list_of_names += f"\n\t\t\t\t\t\t\t\t- {title} {name}"
+
+    LOGGER.info(list_of_names)
+
+
 def main():
-    configure_logger()
-    logging.info("script execution started")
+    configure_logging_system()
+    LOGGER.debug("Script execution started")
     gc = gspread.service_account()
     sheet = gc.open(SHEETS_TITLE)
     worksheet = sheet.sheet1
 
+    global internalheader_to_columnid  # REVIEW - Can be passed as parameter
     internalheader_to_columnid = get_internalheader_to_columnid(worksheet)
     recipients = get_todays_recepients(worksheet, internalheader_to_columnid)
+    log_todays_recipients(recipients)
 
     for recipient in recipients:
+        title = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_TITLE] - 1]
         name = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME] - 1]
         phone_num = (
             "+91"
@@ -221,9 +266,20 @@ def main():
                 internalheader_to_columnid[SheetsHeader.REGISTERED_PHONE_NUMBER] - 1
             ]
         )
+        gotra = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_GOTRA] - 1]
+        rashi = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_RASHI] - 1]
+        nakshatra = recipient[
+            internalheader_to_columnid[SheetsHeader.REGISTERED_NAKSHATRA] - 1
+        ]
+
+        recipient_info = f"""Following data is processed for {title} {name} :\n\t\t\t\t\t\t\t\t- Name : {name}\n\t\t\t\t\t\t\t\t- Phone Number : {phone_num}\n\t\t\t\t\t\t\t\t- Astrological Info : {gotra}/{rashi}/{nakshatra}"""
+        LOGGER.info(recipient_info)
+
         simple_message = get_simple_message()
+        LOGGER.info(f"Sending SMS to {title} {name}")
         send_sms_text(phone_num, simple_message)
-    logging.info("script execution successful")
+        LOGGER.info(f"SMS sent successfully to {title} {name}")
+    LOGGER.debug("Script execution successful")
 
 
 if __name__ == "__main__":
