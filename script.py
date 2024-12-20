@@ -221,24 +221,6 @@ def main():
                 internalheader_to_columnid[SheetsHeader.REGISTERED_PHONE_NUMBER]
             ]
         )
-        # whatsapp_num = recipient[
-        #    internalheader_to_columnid[SheetsHeader.REGISTERED_WHATSAPP_NUMBER] - 1
-        # ]
-        # custom_message = get_custom_message(
-        #     title=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_TITLE]],
-        #     name=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME]],
-        #     receipt_num=recipient[
-        #         internalheader_to_columnid[SheetsHeader.RECEIPT_NUMBER]
-        #     ],
-        #     receipt_date=recipient[
-        #         internalheader_to_columnid[SheetsHeader.REGISTERED_DATE]
-        #     ],
-        #     gotra=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_GOTRA]],
-        #     nakshatra=recipient[
-        #         internalheader_to_columnid[SheetsHeader.REGISTERED_NAKSHATRA]
-        #     ],
-        #     rashi=recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_RASHI]],
-        # )
         simple_message = get_simple_message()
         send_sms_text(phone_num, simple_message)
     logging.info("script execution successful")
