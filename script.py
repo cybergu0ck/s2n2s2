@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
   * This script access the google sheet, parses it and uses the relevant information to send messages via a client.
-  * This script is supposed to be deployed in a server where it will be executed once, everyday.
+  * This script is supposed to be deployed on a raspberry pi where it will be executed on a schedule.
 """
 """
 DEV NOTES:
@@ -11,7 +11,6 @@ TODO - Add exception handling and in the case of exception send fail log to admi
 TODO - Add sim center number in the code
 """
 
-
 import gspread
 import os
 import serial
@@ -20,10 +19,23 @@ import logging
 from datetime import datetime
 from enum import Enum, auto
 
+
 SHEETS_TITLE = "s2n2s2-db"
 TODAY = datetime.today().strftime("%d/%m/%Y")
 TODAY_FOR_LOG = datetime.today().strftime("%Y-%m-%d")
 HEADER_ROW = 1
+
+PORT = "/dev/ttyS0"
+BAUD_RATE = 115200
+TIME_OUT = 1
+SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
+
+LOG_DIR_NAME = "logs"
+LOG_FILE_EXTENSION = ".log"
+PATH_TO_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PATH_TO_LOG_DIR = os.path.join(PATH_TO_SCRIPT_DIR, LOG_DIR_NAME)
+
+DEV_MODE = True
 
 
 class SheetsHeader(Enum):
@@ -51,18 +63,6 @@ sheetsheader_to_internalreference = {
     "Phone Number": SheetsHeader.REGISTERED_PHONE_NUMBER,
     "Whatsapp Number": SheetsHeader.REGISTERED_WHATSAPP_NUMBER,
 }
-
-PORT = "/dev/ttyS0"
-BAUD_RATE = 115200
-TIME_OUT = 1
-SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
-
-DEV_MODE = True
-
-LOG_DIR_NAME = "logs"
-LOG_FILE_EXTENSION = ".log"
-PATH_TO_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PATH_TO_LOG_DIR = os.path.join(PATH_TO_SCRIPT_DIR, LOG_DIR_NAME)
 
 
 def increment_filename(filename):
