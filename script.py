@@ -33,7 +33,8 @@ SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 LOG_DIR_NAME = "logs"
 DEV_LOG_DIR_NAME = "dev-logs"
 ADMIN_LOG_DIR_NAME = "admin-logs"
-LOG_FILE_EXTENSION = ".log"
+DEV_LOG_FILE_EXTENSION = ".txt"
+ADMIN_LOG_FILE_EXTENSION = ".doc"
 PATH_TO_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOGGER = logging.getLogger()
 
@@ -84,7 +85,8 @@ def increment_filename(filename):
 def get_new_filename(filename, is_dev):
     res = increment_filename(filename)
     path = PATH_TO_DEV_LOG_DIR if is_dev else PATH_TO_ADMIN_LOG_DIR
-    path_to_new_filename = os.path.join(path, res + LOG_FILE_EXTENSION)
+    file_extension = DEV_LOG_FILE_EXTENSION if is_dev else ADMIN_LOG_FILE_EXTENSION
+    path_to_new_filename = os.path.join(path, res + file_extension)
     if os.path.exists(path_to_new_filename):
         return get_new_filename(res, is_dev)
     return res
@@ -92,11 +94,12 @@ def get_new_filename(filename, is_dev):
 
 def get_logfile_path(is_dev):
     path = PATH_TO_DEV_LOG_DIR if is_dev else PATH_TO_ADMIN_LOG_DIR
-    path_to_log_file = os.path.join(path, f"{TODAY_FOR_LOG}{LOG_FILE_EXTENSION}")
+    file_extension = DEV_LOG_FILE_EXTENSION if is_dev else ADMIN_LOG_FILE_EXTENSION
+    path_to_log_file = os.path.join(path, f"{TODAY_FOR_LOG}{file_extension}")
     if os.path.exists(path_to_log_file):
         filename = str(os.path.basename(path_to_log_file))
         new_filename = get_new_filename(filename, is_dev)
-        path_to_log_file = os.path.join(path, f"{new_filename}{LOG_FILE_EXTENSION}")
+        path_to_log_file = os.path.join(path, f"{new_filename}{file_extension}")
     return path_to_log_file
 
 
