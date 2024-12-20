@@ -76,7 +76,6 @@ def increment_filename(filename):
         increment = int(filename_without_extension.split(seperator)[-1]) + 1
 
     res += filename_without_extension.split(seperator)[0] + seperator + str(increment)
-    print(res)
     return res
 
 
@@ -215,10 +214,11 @@ def main():
     recipients = get_todays_recepients(worksheet, internalheader_to_columnid)
 
     for recipient in recipients:
+        name = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME] - 1]
         phone_num = (
             "+91"
             + recipient[
-                internalheader_to_columnid[SheetsHeader.REGISTERED_PHONE_NUMBER]
+                internalheader_to_columnid[SheetsHeader.REGISTERED_PHONE_NUMBER] - 1
             ]
         )
         simple_message = get_simple_message()
