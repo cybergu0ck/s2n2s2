@@ -16,11 +16,13 @@ import gspread
 import os
 import serial
 import time
+import logging
 from datetime import datetime
 from enum import Enum, auto
 
 SHEETS_TITLE = "s2n2s2-db"
 TODAY = datetime.today().strftime("%d/%m/%Y")
+TODAY_FOR_LOG = datetime.today().strftime("%Y-%m-%d")
 HEADER_ROW = 1
 
 
@@ -56,6 +58,58 @@ TIME_OUT = 1
 SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 DEV_MODE = True
+
+LOG_DIR_NAME = "logs"
+LOG_FILE_EXTENSION = ".log"
+PATH_TO_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PATH_TO_LOG_DIR = os.path.join(PATH_TO_SCRIPT_DIR, LOG_DIR_NAME)
+
+
+def increment_filename(filename):
+    res = ""
+    seperator = "_"
+    increment = 0
+    filename_without_extension = filename.split(".")[0]
+    if len(filename_without_extension.split(seperator)) == 1:
+        increment += 1
+    else:
+        increment = int(filename_without_extension.split(seperator)[-1]) + 1
+
+    res += filename_without_extension.split(seperator)[0] + seperator + str(increment)
+    print(res)
+    return res
+
+
+def get_new_filename(filename):
+    res = increment_filename(filename)
+    path_to_new_filename = os.path.join(PATH_TO_LOG_DIR, res + LOG_FILE_EXTENSION)
+    if os.path.exists(path_to_new_filename):
+        return get_new_filename(res)
+    return res
+
+
+def get_logfile_path():
+    path_to_log_file = os.path.join(
+        PATH_TO_LOG_DIR, f"{TODAY_FOR_LOG}{LOG_FILE_EXTENSION}"
+    )
+    if os.path.exists(path_to_log_file):
+        filename = str(os.path.basename(path_to_log_file))
+        new_filename = get_new_filename(filename)
+        path_to_log_file = os.path.join(
+            PATH_TO_LOG_DIR, f"{new_filename}{LOG_FILE_EXTENSION}"
+        )
+    return path_to_log_file
+
+
+def configure_logger():
+    os.makedirs(PATH_TO_LOG_DIR, exist_ok=True)
+    logging.basicConfig(
+        filename=get_logfile_path(),
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    logging.info("logger configuration successful")
 
 
 def is_valid_date(value):
@@ -151,6 +205,8 @@ def send_whatsapp_text(number, text):
 
 
 def main():
+    configure_logger()
+    logging.info("script execution started")
     gc = gspread.service_account()
     sheet = gc.open(SHEETS_TITLE)
     worksheet = sheet.sheet1
@@ -185,7 +241,7 @@ def main():
         # )
         simple_message = get_simple_message()
         send_sms_text(phone_num, simple_message)
-        print("job done")
+    logging.info("script execution successful")
 
 
 if __name__ == "__main__":
