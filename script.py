@@ -161,7 +161,9 @@ def is_valid_date(value):
 
 
 def define_internalheader_to_columnid(worksheet):
+def define_internalheader_to_columnid(worksheet):
     """
+    Defines a map with keys as internal header references (encoded column headings) and the values as columen id.
     Defines a map with keys as internal header references (encoded column headings) and the values as columen id.
     - This ensures that script will not fail if columns are interchanged or modified.
     - The
@@ -169,9 +171,12 @@ def define_internalheader_to_columnid(worksheet):
     """
     global INTERNALHEADER_TO_COLUMNID
     INTERNALHEADER_TO_COLUMNID = {}
+    global INTERNALHEADER_TO_COLUMNID
+    INTERNALHEADER_TO_COLUMNID = {}
     header_row_values = worksheet.row_values(HEADER_ROW)
     for id, header in enumerate(header_row_values):
         col_id = id + 1
+        INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = col_id
         INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = col_id
 
 
