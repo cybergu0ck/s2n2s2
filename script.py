@@ -24,6 +24,9 @@ from datetime import datetime
 from enum import Enum, auto
 
 
+DEV_MODE = True
+PI_MODE = False
+
 SHEETS_TITLE = "s2n2s2-db"
 TODAY = datetime.today().strftime("%d/%m/%Y")
 TODAY_FOR_LOG = datetime.today().strftime("%Y-%m-%d")
@@ -32,7 +35,9 @@ HEADER_ROW = 1
 PORT = "/dev/ttyS0"
 BAUD_RATE = 115200
 TIME_OUT = 1
-SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
+if PI_MODE:
+    global SERRIAL_OBJECT
+    SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 LOG_DIR_NAME = "logs"
 DEV_LOG_DIR_NAME = "dev-logs"
@@ -41,8 +46,6 @@ DEV_LOG_FILE_EXTENSION = ".txt"
 ADMIN_LOG_FILE_EXTENSION = ".doc"
 PATH_TO_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOGGER = logging.getLogger()
-
-DEV_MODE = True
 
 
 class SheetsHeader(Enum):
@@ -284,8 +287,9 @@ def main():
 
         simple_message = get_simple_message()
         LOGGER.info(f"Sending SMS to {title} {name}")
-        send_sms_text(phone_num, simple_message)
-        LOGGER.info(f"SMS sent successfully to {title} {name}")
+        if PI_MODE:
+            send_sms_text(phone_num, simple_message)
+            LOGGER.info(f"SMS sent successfully to {title} {name}")
     LOGGER.debug("Script execution successful")
 
 
