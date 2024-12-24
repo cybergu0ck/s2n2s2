@@ -9,6 +9,10 @@ DEV NOTES:
 NOTE - Keep the code simple and donot introduce unnecesary classes.
 TODO - Add exception handling and in the case of exception send fail log to admin number
 TODO - Add sim center number in the code
+TODO - Add email support
+TODO - Add whatsapp support
+TODO - Make an image with details of devottees
+TODO - figure out the mechanism for sending coms
 """
 
 import gspread
