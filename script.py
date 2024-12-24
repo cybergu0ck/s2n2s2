@@ -11,7 +11,6 @@ TODO - Add exception handling and in the case of exception send fail log to admi
 TODO - Add sim center number in the code
 TODO - Add email support
 TODO - Add whatsapp support
-TODO - Make an image with details of devottees
 TODO - figure out the mechanism for sending coms
 """
 
@@ -20,6 +19,9 @@ import os
 import serial
 import time
 import logging
+import matplotlib.pyplot as plt
+import numpy as np
+import shutil
 from datetime import datetime
 from enum import Enum, auto
 
@@ -46,6 +48,9 @@ DEV_LOG_FILE_EXTENSION = ".txt"
 ADMIN_LOG_FILE_EXTENSION = ".doc"
 PATH_TO_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOGGER = logging.getLogger()
+
+TEMP_DIR_NAME = "temp"
+IMAGE_NAME = "devotee-data.png"
 
 
 class SheetsHeader(Enum):
@@ -256,6 +261,35 @@ def log_todays_recipients(recipients):
     LOGGER.info(list_of_names)
 
 
+def save_devotee_data_image(recipients):
+    header_row = []
+    for i in range(1, len(recipients[0]) + 1):
+        key = next((k for k, v in INTERNALHEADER_TO_COLUMNID.items() if v == i), None)
+        original_name = next(
+            (k for k, v in sheetsheader_to_internalreference.items() if v == key), None
+        )
+        header_row.append(original_name)
+    recipients.insert(0, header_row)
+    data = np.array(recipients)
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+    table = ax.table(cellText=data, cellLoc="center", loc="top")
+    table.auto_set_font_size(True)
+    table.auto_set_column_width(col=list(range(len(recipients[0]))))
+    # custom dimensioning
+    # table.set_fontsize(8)
+    # table.scale(2, 1.3)
+    ax.set_axis_off()
+
+    global PATH_TO_TEMP_DIR
+    PATH_TO_TEMP_DIR = os.path.join(PATH_TO_SCRIPT_DIR, TEMP_DIR_NAME)
+    if os.path.exists(PATH_TO_TEMP_DIR):
+        shutil.rmtree(PATH_TO_TEMP_DIR)
+    os.makedirs(TEMP_DIR_NAME)
+    path_to_image = os.path.join(PATH_TO_TEMP_DIR, IMAGE_NAME)
+    plt.savefig(path_to_image, dpi=300)
+
+
 def main():
     configure_logging_system()
     LOGGER.debug("Script execution started")
@@ -266,6 +300,7 @@ def main():
     define_internalheader_to_columnid(worksheet)
     recipients = get_todays_recepients(worksheet)
     log_todays_recipients(recipients)
+    save_devotee_data_image(recipients)
 
     for recipient in recipients:
         title = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1]
