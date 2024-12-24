@@ -160,19 +160,19 @@ def is_valid_date(value):
         return False
 
 
-def get_internalheader_to_columnid(worksheet):
+def define_internalheader_to_columnid(worksheet):
     """
-    Returns a map with keys as internal header references (encoded column headings) and the values as columen id.
+    Defines a map with keys as internal header references (encoded column headings) and the values as columen id.
     - This ensures that script will not fail if columns are interchanged or modified.
     - The
     - Example: {nakshatra: 5, rashi : 6}
     """
-    res = {}
+    global INTERNALHEADER_TO_COLUMNID
+    INTERNALHEADER_TO_COLUMNID = {}
     header_row_values = worksheet.row_values(HEADER_ROW)
     for id, header in enumerate(header_row_values):
         col_id = id + 1
-        res[sheetsheader_to_internalreference[header]] = col_id
-    return res
+        INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = col_id
 
 
 def get_todays_recepients(worksheet, internalheader_to_columnid):
@@ -248,8 +248,8 @@ def log_todays_recipients(recipients):
     list_of_names = f"""List of recipients:"""
 
     for recipient in recipients:
-        title = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_TITLE] - 1]
-        name = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME] - 1]
+        title = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1]
+        name = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1]
         list_of_names += f"\n\t\t\t\t\t\t\t\t- {title} {name}"
 
     LOGGER.info(list_of_names)
@@ -262,24 +262,23 @@ def main():
     sheet = gc.open(SHEETS_TITLE)
     worksheet = sheet.sheet1
 
-    global internalheader_to_columnid  # REVIEW - Can be passed as parameter
-    internalheader_to_columnid = get_internalheader_to_columnid(worksheet)
-    recipients = get_todays_recepients(worksheet, internalheader_to_columnid)
+    define_internalheader_to_columnid(worksheet)
+    recipients = get_todays_recepients(worksheet, INTERNALHEADER_TO_COLUMNID)
     log_todays_recipients(recipients)
 
     for recipient in recipients:
-        title = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_TITLE] - 1]
-        name = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_NAME] - 1]
+        title = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1]
+        name = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1]
         phone_num = (
             "+91"
             + recipient[
-                internalheader_to_columnid[SheetsHeader.REGISTERED_PHONE_NUMBER] - 1
+                INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_PHONE_NUMBER] - 1
             ]
         )
-        gotra = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_GOTRA] - 1]
-        rashi = recipient[internalheader_to_columnid[SheetsHeader.REGISTERED_RASHI] - 1]
+        gotra = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_GOTRA] - 1]
+        rashi = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_RASHI] - 1]
         nakshatra = recipient[
-            internalheader_to_columnid[SheetsHeader.REGISTERED_NAKSHATRA] - 1
+            INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAKSHATRA] - 1
         ]
 
         recipient_info = f"""Following data is processed for {title} {name} :\n\t\t\t\t\t\t\t\t- Name : {name}\n\t\t\t\t\t\t\t\t- Phone Number : {phone_num}\n\t\t\t\t\t\t\t\t- Astrological Info : {gotra}/{rashi}/{nakshatra}"""
