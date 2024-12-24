@@ -12,6 +12,7 @@ TODO - Add sim center number in the code
 TODO - Add email support
 TODO - Add whatsapp support
 TODO - figure out the mechanism for sending coms
+TODO - Calculate the size of sd card needed based on log files generated or figure out a way to clean the log files
 """
 
 import gspread
