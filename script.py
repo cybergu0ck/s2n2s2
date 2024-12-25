@@ -253,7 +253,7 @@ def send_sms_text(recipient_phone_number, sms_message):
     time.sleep(5)
 
 
-def send_email(email_address, subject, body, attachements):
+def send_email(email_address, subject, body, attachements=[]):
     """
     Sends an email.
     Args:
