@@ -71,3 +71,11 @@ def configure_logging_system():
     info_handler.setLevel(logging.INFO)
     LOGGER.addHandler(info_handler)
     LOGGER.debug("Logger system configured successfully")
+
+
+def log_info(info):
+    LOGGER.info(info)
+
+
+def log_debug(info):
+    LOGGER.debug(info)

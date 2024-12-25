@@ -9,7 +9,7 @@ import gspread
 from libs.utilslib.utils import *
 from libs.comslib.email import send_email
 from libs.comslib.sms import send_sms_text
-from libs.loggerlib.logger import LOGGER, configure_logging_system
+from libs.loggerlib.logger import configure_logging_system, log_info
 from libs.corelib.core import (
     SHEETS_TITLE,
     INTERNALHEADER_TO_COLUMNID,
@@ -24,7 +24,7 @@ from libs.corelib.core import (
 
 def main():
     configure_logging_system()
-    LOGGER.debug("Script execution started")
+    log_info("Script execution started")
     gc = gspread.service_account()
     sheet = gc.open(SHEETS_TITLE)
     worksheet = sheet.sheet1
@@ -52,14 +52,14 @@ def main():
         ]
 
         recipient_info = f"""Following data is processed for {title} {name} :\n\t\t\t\t\t\t\t\t- Name : {name}\n\t\t\t\t\t\t\t\t- Phone Number : {phone_num}\n\t\t\t\t\t\t\t\t- Astrological Info : {gotra}/{rashi}/{nakshatra}"""
-        LOGGER.info(recipient_info)
+        log_info(recipient_info)
 
         simple_message = get_simple_message()
-        LOGGER.info(f"Sending SMS to {title} {name}")
+        log_info(f"Sending SMS to {title} {name}")
         if PI_MODE:
             send_sms_text(phone_num, simple_message)
-            LOGGER.info(f"SMS sent successfully to {title} {name}")
-    LOGGER.debug("Script execution successful")
+            log_info(f"SMS sent successfully to {title} {name}")
+    log_info("Script execution successful")
 
 
 if __name__ == "__main__":

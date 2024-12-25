@@ -91,8 +91,7 @@ def log_todays_recipients(recipients):
         title = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1]
         name = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1]
         list_of_names += f"\n\t\t\t\t\t\t\t\t- {title} {name}"
-
-    LOGGER.info(list_of_names)
+    log_info(list_of_names)
 
 
 def save_devotee_data_image(recipients):
