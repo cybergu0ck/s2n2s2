@@ -7,8 +7,6 @@
 
 1. Figure out the mechanism for sending coms
 1. Add sim center number in the code
-1. Add exception handling and in the case of exception send fail log to admin number
-1. Figure out mix up between phone and whatsapp number input with and without country code (add function to utilslib)
 
 <br>
 <br>
