@@ -129,11 +129,11 @@ def save_devotee_data_image(recipients):
     plt.savefig(path_to_image, dpi=300)
 
 
-def get_standard_email_body(title, name):
-    return f"""Namasthe dear devotee, {title} {name}. Greetings from Nalur Shankara Narayana Devasthana. Your Shashwatha Pooja Seva is performed today. May the lord Shankara Narayana bless you and your family members. We look forward for your continuous support. \n\n - Temple Committee"""
+def get_recipient_email_body(title, name):
+    return f"""Namasthe dear devotee, {title} {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Your Shashwatha Pooja Seva is performed today. May the lord Shankara Narayana bless you and your family members. We look forward for your continuous support. \n\n - Temple Committee"""
 
 
-def get_standard_email_attachement():
+def get_recipient_email_attachement():
     res = []
     standard_image = {}
     standard_image["path"] = PATH_TO_ROOT_DIR + "\\assets\\images\\standard.jpeg"
@@ -196,8 +196,8 @@ def dispatch_messages_to_recipients(recipients):
             email_address != ""
         ):  # STUB - proper email validation here instead of this check
             subject = "Confirmation : Shashwatha Pooja Seva"
-            body = get_standard_email_body(title, name)
-            attachments = get_standard_email_attachement()
+            body = get_recipient_email_body(title, name)
+            attachments = get_recipient_email_attachement()
             send_email(email_address, subject, body, attachments)
             log_info(f"Email sent successfully to {title} {name}")
         else:
