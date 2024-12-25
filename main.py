@@ -22,7 +22,7 @@ from libs.corelib.core import (
     define_internalheader_to_columnid,
     get_standard_email_body,
     get_standard_email_attachement,
-    process_data,
+    preprocess_retrived_data,
 )
 
 
@@ -37,7 +37,7 @@ def main():
         worksheet
     )  # TODO - Think about this peice of code
     recipients = get_todays_recepients(worksheet)
-    process_data(recipients)
+    preprocess_retrived_data(recipients)
     log_todays_recipients(recipients)
     save_devotee_data_image(recipients)
 

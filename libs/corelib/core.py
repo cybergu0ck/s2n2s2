@@ -149,7 +149,7 @@ def append_empty_values(recipient, diff):
         recipient.append("")
 
 
-def process_data(recipients):
+def preprocess_retrived_data(recipients):
     """
     It is observed that if the last cells in a row are empty then these cells are complemetly ommitted by gspread api while retrieving the values. This function is to handle this.
     """
