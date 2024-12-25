@@ -9,7 +9,6 @@ DEV NOTES:
 NOTE - Keep the code simple and donot introduce unnecesary classes.
 TODO - Add exception handling and in the case of exception send fail log to admin number
 TODO - Add sim center number in the code
-TODO - Add email support
 TODO - Add whatsapp support
 TODO - figure out the mechanism for sending coms
 TODO - Calculate the size of sd card needed based on log files generated or figure out a way to clean the log files
@@ -25,7 +24,11 @@ import numpy as np
 import shutil
 from datetime import datetime
 from enum import Enum, auto
-
+import ssl
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 
 DEV_MODE = True
 PI_MODE = False
@@ -52,6 +55,9 @@ LOGGER = logging.getLogger()
 
 TEMP_DIR_NAME = "temp"
 IMAGE_NAME = "devotee-data.png"
+
+SENDER_EMAIL_ADDRESS = os.environ.get("S2N2S2-EMAIL")
+SENDER_EMAIL_KEY = os.environ.get("S2N2S2-EMAIL-KEY")
 
 
 class SheetsHeader(Enum):
@@ -242,6 +248,35 @@ def send_sms_text(recipient_phone_number, sms_message):
         print(f"response : {response}\n")
 
     time.sleep(5)
+
+
+def send_email(email_address, subject, body, attachements):
+    """
+    Sends an email.
+    Args:
+        email_address: Receiver's email address
+        subject: Subject of the email
+        body: Body of the email
+        attachements : array of dict's containing path of the file to be attached and name to be given of the attached file.
+    """
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 465
+    context = ssl.create_default_context()
+
+    message = MIMEMultipart()
+    message["Subject"] = subject
+    message["From"] = SENDER_EMAIL_ADDRESS
+    message["To"] = email_address
+    body_part = MIMEText(body)
+    message.attach(body_part)
+
+    for attachement in attachements:
+        with open(attachement["path"], "rb") as file:
+            message.attach(MIMEApplication(file.read(), Name=attachement["name"]))
+
+    with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as server:
+        server.login(SENDER_EMAIL_ADDRESS, SENDER_EMAIL_KEY)
+        server.send_message(message)
 
 
 def send_whatsapp_text(number, text):
