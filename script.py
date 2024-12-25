@@ -12,6 +12,9 @@ TODO - Add sim center number in the code
 TODO - Add whatsapp support
 TODO - figure out the mechanism for sending coms
 TODO - Calculate the size of sd card needed based on log files generated or figure out a way to clean the log files
+TODO - Add google forms integration
+TODO - Organise the entire codebase
+TODO - Figure out mix up between phone and whatsapp number input with and without country code 
 """
 
 import gspread
