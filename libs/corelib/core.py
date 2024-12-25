@@ -23,6 +23,7 @@ class SheetsHeader(Enum):
     REGISTERED_RASHI = auto()
     REGISTERED_PHONE_NUMBER = auto()
     REGISTERED_WHATSAPP_NUMBER = auto()
+    REGISTERED_EMAIL = auto()
 
 
 sheetsheader_to_internalreference = {
@@ -36,6 +37,7 @@ sheetsheader_to_internalreference = {
     "Rashi": SheetsHeader.REGISTERED_RASHI,
     "Phone Number": SheetsHeader.REGISTERED_PHONE_NUMBER,
     "Whatsapp Number": SheetsHeader.REGISTERED_WHATSAPP_NUMBER,
+    "Email Address": SheetsHeader.REGISTERED_EMAIL,
 }
 
 INTERNALHEADER_TO_COLUMNID = {}
@@ -123,3 +125,36 @@ def save_devotee_data_image(recipients):
     os.makedirs(TEMP_DIR_NAME)
     path_to_image = os.path.join(PATH_TO_TEMP_DIR, IMAGE_NAME)
     plt.savefig(path_to_image, dpi=300)
+
+
+def get_standard_email_body(title, name):
+    return f"""Namasthe dear devotee, {title} {name}. Greetings from Nalur Shankara Narayana Devasthana. Your Shashwatha Pooja Seva is performed today. May the lord Shankara Narayana bless you and your family members. We look forward for your continuous support. \n\n - Temple Committee"""
+
+
+def get_standard_email_attachement():
+    res = []
+    standard_image = {}
+    standard_image["path"] = PATH_TO_ROOT_DIR + "\\assets\\images\\standard.jpeg"
+    standard_image["name"] = "NalurShankaraNarayana.jpeg"
+    res.append(standard_image)
+    return res
+
+
+def get_num_cols():
+    return len(sheetsheader_to_internalreference)
+
+
+def append_empty_values(recipient, diff):
+    for i in range(diff):
+        recipient.append("")
+
+
+def process_data(recipients):
+    """
+    It is observed that if the last cells in a row are empty then these cells are complemetly ommitted by gspread api while retrieving the values. This function is to handle this.
+    """
+    num_cols = get_num_cols()
+    for recipient in recipients:
+        if len(recipient) != num_cols:
+            diff = num_cols - len(recipient)
+            append_empty_values(recipient, diff)
