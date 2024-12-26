@@ -287,10 +287,6 @@ def dispatch_messages_to_recipients(recipients):
         time.sleep(4)
 
 
-def prepare_hmtl_table(recipients):
-    html = generate_html_table(recipients, get_header_row())
-
-
 def dispatch_message_to_admins(recipients):
     """
     Sends notification email to admins.
