@@ -5,7 +5,6 @@
 
 ## Todo
 
-1. Figure out the mechanism for sending coms
 1. Add sim center number in the code
 
 <br>
