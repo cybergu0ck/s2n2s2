@@ -1,10 +1,19 @@
 from unittest import TestCase
-from libs.utilslib.utils import is_valid_email, is_valid_phone_number
+from libs.utilslib.utils import (
+    is_valid_email,
+    is_valid_phone_number,
+    format_phone_number,
+)
 
 
 class UtilsTestCase(TestCase):
     def setUp(self):
         pass
+
+    def test_format_phone_number(self):
+        self.assertEqual(format_phone_number("+919424384561"), "+919424384561")
+        self.assertEqual(format_phone_number("9424384561"), "+919424384561")
+        self.assertEqual(format_phone_number("919424384561"), "+919424384561")
 
     def test_valid_phone_numbers(self):
         valid_phone_numbers = [
