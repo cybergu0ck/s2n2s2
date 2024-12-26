@@ -1,6 +1,7 @@
 from unittest import TestCase
 from libs.utilslib.utils import is_valid_email
 
+
 class UtilsTestCase(TestCase):
     def setUp(self):
         pass
@@ -15,10 +16,13 @@ class UtilsTestCase(TestCase):
             "user.name@example.com",
             "user_name@example.com",
             "user-name@example.com",
-            "u.s.e.r.n.a.m.e@mail.com"
+            "u.s.e.r.n.a.m.e@mail.com",
         ]
         for email in valid_emails:
-            self.assertTrue(is_valid_email(email), f'Valid email has been marked as invalid: {email}')
+            self.assertTrue(
+                is_valid_email(email),
+                f"Valid email has been marked as invalid: {email}",
+            )
 
     def test_invalid_emails(self):
         invalid_emails = [
@@ -41,7 +45,10 @@ class UtilsTestCase(TestCase):
             "username@sub.example..com",
             "u..s.e.r.n.a.m.e@mail.com",
             "u.s.e.r.n.a.m.e@mail.com.",
-            ".u.s.e.r.n.a.m.e@mail.com"
+            ".u.s.e.r.n.a.m.e@mail.com",
         ]
         for email in invalid_emails:
-            self.assertFalse(is_valid_email(email), f'Invalid email has been marked as valid: {email}')
+            self.assertFalse(
+                is_valid_email(email),
+                f"Invalid email has been marked as valid: {email}",
+            )
