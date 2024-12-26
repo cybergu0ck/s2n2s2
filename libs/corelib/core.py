@@ -273,13 +273,12 @@ def dispatch_messages_to_recipients(recipients):
             log_info(f"SMS sent successfully to {title} {name}")
 
         log_info(f"Sending email to {title} {name}")
-        if (
-            email_address != ""
-        ):  # STUB - proper email validation here instead of this check
-            subject = "Confirmation : Shashwatha Pooja Seva"
-            body = get_email_body_for_recipient(title, name)
-            attachments = get_email_attachement_for_recipient()
-            send_email(email_address, subject, body, attachments)
+
+        subject = "Confirmation : Shashwatha Pooja Seva"
+        body = get_email_body_for_recipient(title, name)
+        attachments = get_email_attachement_for_recipient()
+        success_email = send_email(email_address, subject, body, attachments)
+        if success_email:
             log_info(f"Email sent successfully to {title} {name}")
         else:
             log_info(f"Email not sent to {title} {name}")
