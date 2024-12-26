@@ -58,14 +58,17 @@ def configure_logging_system():
 
     LOGGER.setLevel(logging.DEBUG)
     LOGGER.debug("Logger configuration successful")
-
-    debug_handler = logging.FileHandler(get_logfile_path(True))
+    global PATH_TO_CURRENT_SESSION_DEV_LOG
+    PATH_TO_CURRENT_SESSION_DEV_LOG = get_logfile_path(True)
+    debug_handler = logging.FileHandler(PATH_TO_CURRENT_SESSION_DEV_LOG)
     debug_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     debug_handler.setFormatter(debug_formatter)
     debug_handler.setLevel(logging.DEBUG)
     LOGGER.addHandler(debug_handler)
 
-    info_handler = logging.FileHandler(get_logfile_path(False))
+    global PATH_TO_CURRENT_SESSION_ADMIN_LOG
+    PATH_TO_CURRENT_SESSION_ADMIN_LOG = get_logfile_path(False)
+    info_handler = logging.FileHandler(PATH_TO_CURRENT_SESSION_ADMIN_LOG)
     info_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     info_handler.setFormatter(info_formatter)
     info_handler.setLevel(logging.INFO)
@@ -79,3 +82,10 @@ def log_info(info):
 
 def log_debug(info):
     LOGGER.debug(info)
+
+
+def get_path_to_current_session_log(is_dev=False):
+    if is_dev:
+        return PATH_TO_CURRENT_SESSION_DEV_LOG
+    else:
+        return PATH_TO_CURRENT_SESSION_ADMIN_LOG

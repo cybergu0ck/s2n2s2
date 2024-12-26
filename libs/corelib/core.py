@@ -6,12 +6,13 @@ import shutil
 from enum import Enum, auto
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 SHEETS_TITLE = "s2n2s2-db"
 HEADER_ROW = 1
 
 TEMP_DIR_NAME = "temp"
-IMAGE_NAME = "devotee-data.png"
+IMAGE_NAME = "devotees-list.png"
 
 
 class SheetsHeader(Enum):
@@ -101,7 +102,7 @@ def log_todays_recipients(recipients):
 def save_devotee_data_image(recipients):
     recipients_copy = recipients.copy()
     header_row = []
-    for i in range(1, len(recipients_copy[0]) + 1):
+    for i in range(1, get_num_cols() + 1):
         key = next((k for k, v in INTERNALHEADER_TO_COLUMNID.items() if v == i), None)
         original_name = next(
             (k for k, v in sheetsheader_to_internalreference.items() if v == key), None
@@ -142,6 +143,26 @@ def get_recipient_email_attachement():
     return res
 
 
+def get_admin_email_body(name, no_mail):
+    if no_mail:
+        return f"""Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. There is NO Shashwatha Pooja Seva today, {TODAY}.\n\n\n-Admin Team"""
+    else:
+        return f"""Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Please find attached the log files along with an image that contains the list of recipients for whom the pooja is scheduled to be performed today, {TODAY}. Additionally, the confirmation messages that need to be sent for the same.\n\n\n-Admin Team"""
+
+
+def get_admin_email_attachment():
+    res = []
+    devotee_image = {}
+    devotee_image["path"] = PATH_TO_TEMP_DIR + "\\" + IMAGE_NAME
+    devotee_image["name"] = IMAGE_NAME
+    res.append(devotee_image)
+    log_file = {}
+    log_file["path"] = get_path_to_current_session_log(False)
+    log_file["name"] = get_path_to_current_session_log(False).split("\\")[-1]
+    res.append(log_file)
+    return res
+
+
 def get_num_cols():
     return len(sheetsheader_to_internalreference)
 
@@ -160,6 +181,25 @@ def preprocess_retrived_data(recipients):
         if len(recipient) != num_cols:
             diff = num_cols - len(recipient)
             append_empty_values(recipient, diff)
+
+
+def dispatch_message_to_admins(recipients):
+    path = PATH_TO_ROOT_DIR + "\\users\\users.json"
+    with open(path, "r") as file:
+        data = json.load(file)
+        users = data["users"]
+        for user in users:
+            if user["admin_privilege"]:
+                for email in user["email"]:
+                    subject = "Daily Notification"
+                    attachments = get_admin_email_attachment()
+                    body = ""
+                    if len(recipients):
+                        body = get_admin_email_body(user["name"], False)
+                    else:
+                        body = get_admin_email_body(user["name"], True)
+                    send_email(email, subject, body, attachments)
+    log_info(f"Email sent successfully to admins")
 
 
 def dispatch_messages_to_recipients(recipients):

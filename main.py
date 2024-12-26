@@ -17,12 +17,13 @@ from libs.corelib.core import (
     define_internalheader_to_columnid,
     preprocess_retrived_data,
     dispatch_messages_to_recipients,
+    dispatch_message_to_admins,
 )
 
 
 def main():
     configure_logging_system()
-    log_info("Script execution started")
+    log_info("Starting todays script execution")
     gc = gspread.service_account()
     sheet = gc.open(SHEETS_TITLE)
     worksheet = sheet.sheet1
@@ -35,8 +36,9 @@ def main():
     log_todays_recipients(recipients)
     save_devotee_data_image(recipients)
     dispatch_messages_to_recipients(recipients)
+    dispatch_message_to_admins(recipients)
 
-    log_info("Script execution successful")
+    log_info("Script executed completely")
 
 
 if __name__ == "__main__":
