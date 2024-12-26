@@ -1,43 +1,35 @@
 #!/usr/bin/env python3
 """
-  * This script access the google sheet, parses it and uses the relevant information to send messages via a client.
-  * This script is supposed to be deployed on a raspberry pi where it will be executed on a schedule.
+This script automates the process of accessing a Google Sheet, parsing its contents, and sending messages to recipients based on the data retrieved. It is designed to run on a Raspberry Pi and is to be scheduled for periodic execution.
+
+This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
 """
 
-
-import gspread
+from config import configure_directories
 from libs.utilslib.utils import *
-
 from libs.loggerlib.logger import configure_logging_system, log_info
 from libs.corelib.core import (
-    SHEETS_TITLE,
+    prepare_data,
     get_todays_recepients,
-    save_devotee_data_image,
-    log_todays_recipients,
-    define_internalheader_to_columnid,
-    preprocess_retrived_data,
-    dispatch_messages_to_recipients,
-    dispatch_message_to_admins,
+    save_and_dispatch,
 )
 
 
-def main():
+def setup_environment():
+    """
+    Performs configurations and sets up the environment.
+    """
+    configure_directories()
     configure_logging_system()
+
+
+def main():
+    """Main function to execute the daily messaging script."""
     log_info("Starting todays script execution")
-    gc = gspread.service_account()
-    sheet = gc.open(SHEETS_TITLE)
-    worksheet = sheet.sheet1
-
-    define_internalheader_to_columnid(
-        worksheet
-    )  # TODO - Think about this peice of code
-    recipients = get_todays_recepients(worksheet)
-    preprocess_retrived_data(recipients)
-    log_todays_recipients(recipients)
-    save_devotee_data_image(recipients)
-    dispatch_messages_to_recipients(recipients)
-    dispatch_message_to_admins(recipients)
-
+    setup_environment()
+    prepare_data()
+    recipients = get_todays_recepients()
+    save_and_dispatch(recipients)
     log_info("Script executed completely")
 
 

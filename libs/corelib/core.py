@@ -1,8 +1,9 @@
 from . import *
 from libs.comslib.email import send_email
 from libs.comslib.sms import send_sms_text
+import gspread
 import time
-import shutil
+
 from enum import Enum, auto
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,9 +11,10 @@ import json
 
 SHEETS_TITLE = "s2n2s2-db"
 HEADER_ROW = 1
+WORKSHEET = None
+INTERNALHEADER_TO_COLUMNID = {}
 
-TEMP_DIR_NAME = "temp"
-IMAGE_NAME = "devotees-list.png"
+IMAGE_NAME = "recipients-list.png"
 
 
 class SheetsHeader(Enum):
@@ -43,63 +45,98 @@ sheetsheader_to_internalreference = {
     "Email Address": SheetsHeader.REGISTERED_EMAIL,
 }
 
-INTERNALHEADER_TO_COLUMNID = {}
+
+def get_num_cols():
+    return len(sheetsheader_to_internalreference)
 
 
-def define_internalheader_to_columnid(worksheet):
+def load_google_sheet():
+    gc = gspread.service_account()
+    sheet = gc.open(SHEETS_TITLE)
+    global WORKSHEET
+    WORKSHEET = sheet.sheet1
+
+
+def populate_header_to_column_mapping():
     """
-    Defines a map with keys as internal header references (encoded column headings) and the values as columen id.
-    Defines a map with keys as internal header references (encoded column headings) and the values as columen id.
+    Populates a map with keys as internal header references (encoded column headings) and the values as columen id.
+    Populates a map with keys as internal header references (encoded column headings) and the values as columen id.
     - This ensures that script will not fail if columns are interchanged or modified.
     - The
     - Example: {nakshatra: 5, rashi : 6}
     """
-    header_row_values = worksheet.row_values(HEADER_ROW)
+    global INTERNALHEADER_TO_COLUMNID
+    header_row_values = WORKSHEET.row_values(HEADER_ROW)
     for id, header in enumerate(header_row_values):
         col_id = id + 1
         INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = col_id
 
 
-def get_todays_recepients(worksheet):
+def prepare_data():
     """
-    Returns a list containing list of all the values of a row whose date corresponds to today's date.
+    Loads the google sheet and initialises the header_to_column mapping.
+    """
+    load_google_sheet()
+    populate_header_to_column_mapping()
+
+
+def append_empty_values(recipient, diff):
+    for i in range(diff):
+        recipient.append("")
+
+
+def preprocess_retrived_data(recipients):
+    """
+    It is observed that if the last cells in a row are empty then these cells are complemetly ommitted by gspread api while retrieving the values. This function is to handle this.
+    """
+    num_cols = get_num_cols()
+    for recipient in recipients:
+        if len(recipient) != num_cols:
+            diff = num_cols - len(recipient)
+            append_empty_values(recipient, diff)
+
+
+def get_todays_recepients():
+    """
+    Retrieves processed recipient data for entries registered today.
+
+    Returns:
+        list: A list of rows containing recipient data where the registered date matches today's date.
+        example : [['1','Ramesh', 'ramesh@email.com'],['19','Suresh', 'suresh@email.com'] ]
     """
     res = []
-    date_column_values = worksheet.col_values(
+    date_column_values = WORKSHEET.col_values(
         INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_DATE]
     )
     for row_id, cell_value in enumerate(date_column_values[1:], start=2):
         if is_valid_date(cell_value):
             if cell_value == TODAY:
-                row_values = worksheet.row_values(row_id)
+                row_values = WORKSHEET.row_values(row_id)
                 res.append(row_values)
+
+    preprocess_retrived_data(res)
+
     return res
-
-
-def get_custom_message(**kwargs):
-    """
-    Returns the custom text for the input parameters
-    """
-
-    res = f"Namasthe {kwargs.get('title')} {kwargs.get('name')}, Greetings from Naalur. As per Receipt Number {kwargs.get('receipt_num')}, dated {kwargs.get('receipt_date')}, Pooje has been done in the name of {kwargs.get('name')} of {kwargs.get('gotra')} Gotra, {kwargs.get('nakshatra')} Nakshtra, {kwargs.get('rashi')} Rashi. May the blessings of Naalur Devasthana always be with you."
-    return res
-
-
-def get_simple_message():
-    return "Dear devotee of Lord Nalur Shankara Narayana Swamy, your Shashwatha Pooja Seva is performed today."
 
 
 def log_todays_recipients(recipients):
-    list_of_names = f"""List of recipients:"""
+    info = "placeholder text"
+    if len(recipients) != 0:
+        info = f"""List of recipients:"""
+        for recipient in recipients:
+            title = recipient[
+                INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1
+            ]
+            name = recipient[
+                INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1
+            ]
+            info += f"\n\t\t\t\t\t\t\t\t- {title} {name}"
+    else:
+        info = f"List of recipients is empty"
+    log_info(info)
 
-    for recipient in recipients:
-        title = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1]
-        name = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1]
-        list_of_names += f"\n\t\t\t\t\t\t\t\t- {title} {name}"
-    log_info(list_of_names)
 
-
-def save_devotee_data_image(recipients):
+def save_recipients_as_image(recipients):
     recipients_copy = recipients.copy()
     header_row = []
     for i in range(1, get_num_cols() + 1):
@@ -121,20 +158,27 @@ def save_devotee_data_image(recipients):
     # table.scale(2, 1.3)
     ax.set_axis_off()
 
-    global PATH_TO_TEMP_DIR
-    PATH_TO_TEMP_DIR = os.path.join(PATH_TO_ROOT_DIR, TEMP_DIR_NAME)
-    if os.path.exists(PATH_TO_TEMP_DIR):
-        shutil.rmtree(PATH_TO_TEMP_DIR)
-    os.makedirs(TEMP_DIR_NAME)
     path_to_image = os.path.join(PATH_TO_TEMP_DIR, IMAGE_NAME)
     plt.savefig(path_to_image, dpi=300)
 
 
-def get_recipient_email_body(title, name):
+def save_recipients(recipients):
+    """
+    Log the recipients data and save an image containing list of the recipients
+    """
+    log_todays_recipients(recipients)
+    save_recipients_as_image(recipients)
+
+
+def get_simple_message():
+    return "Dear devotee of Lord Nalur Shankara Narayana Swamy, your Shashwatha Pooja Seva is performed today."
+
+
+def get_email_body_for_recipient(title, name):
     return f"""Namasthe dear devotee, {title} {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Your Shashwatha Pooja Seva is performed today. May the lord Shankara Narayana bless you and your family members. We look forward for your continuous support. \n\n - Temple Committee"""
 
 
-def get_recipient_email_attachement():
+def get_email_attachement_for_recipient():
     res = []
     standard_image = {}
     standard_image["path"] = PATH_TO_ROOT_DIR + "\\assets\\images\\standard.jpeg"
@@ -143,14 +187,14 @@ def get_recipient_email_attachement():
     return res
 
 
-def get_admin_email_body(name, no_mail):
-    if no_mail:
+def get_email_body_for_admin(name, no_recipients):
+    if no_recipients:
         return f"""Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. There is NO Shashwatha Pooja Seva today, {TODAY}.\n\n\n-Admin Team"""
     else:
         return f"""Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Please find attached the log files along with an image that contains the list of recipients for whom the pooja is scheduled to be performed today, {TODAY}. Additionally, the confirmation messages that need to be sent for the same.\n\n\n-Admin Team"""
 
 
-def get_admin_email_attachment():
+def get_email_attachement_for_admin():
     res = []
     devotee_image = {}
     devotee_image["path"] = PATH_TO_TEMP_DIR + "\\" + IMAGE_NAME
@@ -163,46 +207,10 @@ def get_admin_email_attachment():
     return res
 
 
-def get_num_cols():
-    return len(sheetsheader_to_internalreference)
-
-
-def append_empty_values(recipient, diff):
-    for i in range(diff):
-        recipient.append("")
-
-
-def preprocess_retrived_data(recipients):
-    """
-    It is observed that if the last cells in a row are empty then these cells are complemetly ommitted by gspread api while retrieving the values. This function is to handle this.
-    """
-    num_cols = get_num_cols()
-    for recipient in recipients:
-        if len(recipient) != num_cols:
-            diff = num_cols - len(recipient)
-            append_empty_values(recipient, diff)
-
-
-def dispatch_message_to_admins(recipients):
-    path = PATH_TO_ROOT_DIR + "\\users\\users.json"
-    with open(path, "r") as file:
-        data = json.load(file)
-        users = data["users"]
-        for user in users:
-            if user["admin_privilege"]:
-                for email in user["email"]:
-                    subject = "Daily Notification"
-                    attachments = get_admin_email_attachment()
-                    body = ""
-                    if len(recipients):
-                        body = get_admin_email_body(user["name"], False)
-                    else:
-                        body = get_admin_email_body(user["name"], True)
-                    send_email(email, subject, body, attachments)
-    log_info(f"Email sent successfully to admins")
-
-
 def dispatch_messages_to_recipients(recipients):
+    """
+    Sends confirmation SMS and email messages to the list of recipients.
+    """
     for recipient in recipients:
         title = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1]
         name = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1]
@@ -236,11 +244,43 @@ def dispatch_messages_to_recipients(recipients):
             email_address != ""
         ):  # STUB - proper email validation here instead of this check
             subject = "Confirmation : Shashwatha Pooja Seva"
-            body = get_recipient_email_body(title, name)
-            attachments = get_recipient_email_attachement()
+            body = get_email_body_for_recipient(title, name)
+            attachments = get_email_attachement_for_recipient()
             send_email(email_address, subject, body, attachments)
             log_info(f"Email sent successfully to {title} {name}")
         else:
             log_info(f"Email not sent to {title} {name}")
 
         time.sleep(4)
+
+
+def dispatch_message_to_admins(recipients):
+    """
+    Sends notification email to admins.
+    """
+    path = PATH_TO_ROOT_DIR + "\\users\\users.json"
+    with open(path, "r") as file:
+        data = json.load(file)
+        users = data["users"]
+        for user in users:
+            if user["admin_privilege"]:
+                for email in user["email"]:
+                    subject = "Daily Notification"
+                    attachments = get_email_attachement_for_admin()
+                    body = ""
+                    if len(recipients):
+                        body = get_email_body_for_admin(user["name"], False)
+                    else:
+                        body = get_email_body_for_admin(user["name"], True)
+                    send_email(email, subject, body, attachments)
+    log_info(f"Email sent successfully to admins")
+
+
+def dispatch_communications(recipients):
+    dispatch_messages_to_recipients(recipients)
+    dispatch_message_to_admins(recipients)
+
+
+def save_and_dispatch(recipients):
+    save_recipients(recipients)
+    dispatch_communications(recipients)

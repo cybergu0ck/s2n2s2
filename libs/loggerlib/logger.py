@@ -1,13 +1,9 @@
 from . import *
-
 import logging
 
-LOG_DIR_NAME = "logs"
-DEV_LOG_DIR_NAME = "dev-logs"
-ADMIN_LOG_DIR_NAME = "admin-logs"
-DEV_LOG_FILE_EXTENSION = ".txt"
-ADMIN_LOG_FILE_EXTENSION = ".doc"
 LOGGER = logging.getLogger()
+PATH_TO_CURRENT_SESSION_DEV_LOG = ""
+PATH_TO_CURRENT_SESSION_ADMIN_LOG = ""
 
 
 def get_new_filename(filename, is_dev):
@@ -31,30 +27,10 @@ def get_logfile_path(is_dev):
     return path_to_log_file
 
 
-def create_log_directories():
-    if not os.path.exists(LOG_DIR_NAME):
-        os.makedirs(LOG_DIR_NAME)
-
-    global PATH_TO_LOG_DIR
-    PATH_TO_LOG_DIR = os.path.join(PATH_TO_ROOT_DIR, LOG_DIR_NAME)
-
-    dev_log_dir = os.path.join(PATH_TO_LOG_DIR, DEV_LOG_DIR_NAME)
-    if not os.path.exists(dev_log_dir):
-        os.makedirs(f"{LOG_DIR_NAME}/{DEV_LOG_DIR_NAME}")
-
-    global PATH_TO_DEV_LOG_DIR
-    PATH_TO_DEV_LOG_DIR = os.path.join(PATH_TO_LOG_DIR, DEV_LOG_DIR_NAME)
-
-    admin_log_dir = os.path.join(PATH_TO_LOG_DIR, ADMIN_LOG_DIR_NAME)
-    if not os.path.exists(admin_log_dir):
-        os.makedirs(f"{LOG_DIR_NAME}/{ADMIN_LOG_DIR_NAME}")
-
-    global PATH_TO_ADMIN_LOG_DIR
-    PATH_TO_ADMIN_LOG_DIR = os.path.join(PATH_TO_LOG_DIR, ADMIN_LOG_DIR_NAME)
-
-
 def configure_logging_system():
-    create_log_directories()
+    """
+    Configures the logging system.
+    """
 
     LOGGER.setLevel(logging.DEBUG)
     LOGGER.debug("Logger configuration successful")
