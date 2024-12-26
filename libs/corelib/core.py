@@ -268,9 +268,11 @@ def dispatch_messages_to_recipients(recipients):
         simple_message = get_simple_message()
         log_info(f"Sending SMS to {title} {name}")
         if PI_MODE:
-            # STUB - phone number validation goes here
-            send_sms_text(phone_num, simple_message)
-            log_info(f"SMS sent successfully to {title} {name}")
+            sucess_sms = send_sms_text(phone_num, simple_message)
+            if sucess_sms:
+                log_info(f"SMS sent successfully to {title} {name}")
+            else:
+                log_info(f"SMS not sent to {title} {name}")
 
         log_info(f"Sending email to {title} {name}")
 
