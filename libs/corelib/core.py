@@ -136,23 +136,27 @@ def log_todays_recipients(recipients):
     log_info(info)
 
 
-def save_recipients_as_image(recipients):
-    recipients_copy = recipients.copy()
-    header_row = []
+def get_header_row():
+    res = []
     for i in range(1, get_num_cols() + 1):
         key = next((k for k, v in INTERNALHEADER_TO_COLUMNID.items() if v == i), None)
         original_name = next(
             (k for k, v in sheetsheader_to_internalreference.items() if v == key), None
         )
-        header_row.append(original_name)
+        res.append(original_name)
+    return res
 
-    recipients_copy.insert(0, header_row)
-    data = np.array(recipients_copy)
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+def save_recipients_as_image(recipients):
+    data = recipients.copy()
+    header_row = get_header_row()
+    data.insert(0, header_row)
+    data = np.array(data)
+
+    fig, ax = plt.subplots(figsize=(14, 10))
     table = ax.table(cellText=data, cellLoc="center", loc="top")
     table.auto_set_font_size(True)
-    table.auto_set_column_width(col=list(range(len(recipients_copy[0]))))
+    table.auto_set_column_width(col=list(range(len(data[0]))))
     # custom dimensioning
     # table.set_fontsize(8)
     # table.scale(2, 1.3)
@@ -187,11 +191,40 @@ def get_email_attachement_for_recipient():
     return res
 
 
-def get_email_body_for_admin(name, no_recipients):
-    if no_recipients:
-        return f"""Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. There is NO Shashwatha Pooja Seva today, {TODAY}.\n\n\n-Admin Team"""
+def get_email_body_for_admin(name, recipients):
+    html = """\
+    <html>
+    """
+    html += f"""
+    <body>
+        <p>Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana.</p>
+        <div class="spacer"></div> 
+    """
+
+    if len(recipients) == 0:
+        html += f"""
+        <p>There is no Shashwatha Pooja Seva today, dated {TODAY}</p>
+        <div class="spacer"></div> 
+        """
     else:
-        return f"""Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Please find attached the log files along with an image that contains the list of recipients for whom the pooja is scheduled to be performed today, {TODAY}. Additionally, the confirmation messages that need to be sent for the same.\n\n\n-Admin Team"""
+        html += f"""
+        <p>The following is the list of recipients for today's Shashwatha Pooja Seva, dated {TODAY}.</p>
+        <div class="spacer"></div> 
+        """
+        html += generate_html_table(recipients, get_header_row())
+        html += """
+        <div class="spacer"></div> 
+        """
+
+    html += """
+    <p>The image containing the same data along with the generated log files are attached.</p>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <p>- Dev</p>
+    </body>
+    </html>
+    """
+    return html
 
 
 def get_email_attachement_for_admin():
@@ -254,6 +287,10 @@ def dispatch_messages_to_recipients(recipients):
         time.sleep(4)
 
 
+def prepare_hmtl_table(recipients):
+    html = generate_html_table(recipients, get_header_row())
+
+
 def dispatch_message_to_admins(recipients):
     """
     Sends notification email to admins.
@@ -267,12 +304,8 @@ def dispatch_message_to_admins(recipients):
                 for email in user["email"]:
                     subject = "Daily Notification"
                     attachments = get_email_attachement_for_admin()
-                    body = ""
-                    if len(recipients):
-                        body = get_email_body_for_admin(user["name"], False)
-                    else:
-                        body = get_email_body_for_admin(user["name"], True)
-                    send_email(email, subject, body, attachments)
+                    body = get_email_body_for_admin(user["name"], recipients)
+                    send_email(email, subject, body, attachments, True)
     log_info(f"Email sent successfully to admins")
 
 
