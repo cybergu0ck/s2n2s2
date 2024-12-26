@@ -4,3 +4,4 @@ temp/
 email-info.txt
 __pycache__/
 users/
+*.orig
