@@ -1,5 +1,6 @@
-venv
-logs
-temp
+venv/
+logs/
+temp/
 email-info.txt
 __pycache__/
+users/
