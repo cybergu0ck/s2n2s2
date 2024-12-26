@@ -247,9 +247,8 @@ def dispatch_messages_to_recipients(recipients):
     for recipient in recipients:
         title = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1]
         name = recipient[INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1]
-        phone_num = (
-            "+91"
-            + recipient[
+        phone_num = format_phone_number(
+            recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_PHONE_NUMBER] - 1
             ]
         )

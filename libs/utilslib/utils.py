@@ -89,6 +89,19 @@ def is_valid_phone_number(phone_number: str) -> bool:
         return False
 
 
+def format_phone_number(phone_number):
+    if is_valid_phone_number(phone_number):
+        return phone_number
+    else:
+        res = phone_number
+        res.replace(" ", "")
+        if match(r"^\d{10}$", res):
+            res = "+91" + res
+        elif match(r"^91\d{10}$", res):
+            res = "+" + res
+        return res
+
+
 def is_valid_email(address: str) -> bool:
     """Check if the given string is a valid email address."""
     return (
