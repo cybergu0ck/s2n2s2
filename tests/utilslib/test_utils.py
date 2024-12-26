@@ -1,10 +1,35 @@
 from unittest import TestCase
-from libs.utilslib.utils import is_valid_email
+from libs.utilslib.utils import is_valid_email, is_valid_phone_number
 
 
 class UtilsTestCase(TestCase):
     def setUp(self):
         pass
+
+    def test_valid_phone_numbers(self):
+        valid_phone_numbers = [
+            "+919424384561",
+        ]
+        for phone_num in valid_phone_numbers:
+            self.assertTrue(
+                is_valid_phone_number(phone_num),
+                f"Valid phone number has been marked as invalid: {phone_num}",
+            )
+
+    def test_invalid_phone_numbers(self):
+        invalid_phone_numbers = [
+            "",
+            "9424384561",
+            "919424384561",
+            "91 9424384561",
+            "+ 919424384561",
+            "+ 91 9424384561",
+        ]
+        for phone_num in invalid_phone_numbers:
+            self.assertFalse(
+                is_valid_phone_number(phone_num),
+                f"Invalid phone number has been marked as valid: {phone_num}",
+            )
 
     def test_valid_emails(self):
         valid_emails = [

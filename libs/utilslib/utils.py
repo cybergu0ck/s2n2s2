@@ -1,5 +1,6 @@
 from . import *
 from datetime import datetime
+import re
 from re import match
 
 TODAY = datetime.today().strftime("%d/%m/%Y")
@@ -77,6 +78,15 @@ def generate_html_table(two_d_array, headers):
     html += "</table>"
 
     return html
+
+
+def is_valid_phone_number(phone_number: str) -> bool:
+    """Check if the given string is a valid Indian phone number"""
+    pattern = re.compile(r"^\+91\d{10}$")
+    if pattern.match(phone_number):
+        return True
+    else:
+        return False
 
 
 def is_valid_email(address: str) -> bool:
