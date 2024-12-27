@@ -6,9 +6,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
-SENDER_EMAIL_ADDRESS = os.environ.get("S2N2S2-EMAIL")
-SENDER_EMAIL_KEY = os.environ.get("S2N2S2-EMAIL-KEY")
-
+SENDER_EMAIL_ADDRESS = os.environ.get("S2N2S2EMAIL")
+SENDER_EMAIL_KEY = os.environ.get("S2N2S2EMAILKEY")
+print(SENDER_EMAIL_ADDRESS)
+print(SENDER_EMAIL_KEY)
 
 def send_email(email_address, subject, body, attachements=[], is_html=False) -> bool:
     """

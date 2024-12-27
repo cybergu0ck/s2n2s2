@@ -3,7 +3,7 @@ import os
 import shutil
 
 DEV_MODE = True
-PI_MODE = False
+PI_MODE = True
 
 LOG_DIR_NAME = "logs"
 DEV_LOG_DIR_NAME = "dev-logs"
@@ -16,6 +16,8 @@ PATH_TO_LOG_DIR = os.path.join(PATH_TO_ROOT_DIR, LOG_DIR_NAME)
 PATH_TO_DEV_LOG_DIR = os.path.join(PATH_TO_LOG_DIR, DEV_LOG_DIR_NAME)
 PATH_TO_ADMIN_LOG_DIR = os.path.join(PATH_TO_LOG_DIR, ADMIN_LOG_DIR_NAME)
 
+PATH_TO_ASSETS_DIR = os.path.join(PATH_TO_ROOT_DIR, 'assets')
+PATH_TO_IMAGE_ASSETS_DIR = os.path.join(PATH_TO_ASSETS_DIR, 'images')
 
 TEMP_DIR_NAME = "temp"
 PATH_TO_TEMP_DIR = os.path.join(PATH_TO_ROOT_DIR, TEMP_DIR_NAME)

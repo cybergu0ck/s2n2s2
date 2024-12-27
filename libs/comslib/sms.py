@@ -10,7 +10,8 @@ if PI_MODE:
     SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 
-def configure_serial(SERRIAL_OBJECT):
+def configure_serial():
+    global SERRIAL_OBJECT
     SERRIAL_OBJECT.write(b"AT+CMGF=1\r")  # Set the SMS message format to text mode
     user_command = SERRIAL_OBJECT.readline().decode().strip()  # Read the echoed command
     if DEV_MODE:
@@ -22,6 +23,7 @@ def configure_serial(SERRIAL_OBJECT):
 
 
 def send_sms_text(recipient_phone_number, sms_message) -> bool:
+    configure_serial()
     if is_valid_phone_number(recipient_phone_number):
         SERRIAL_OBJECT.write(f'AT+CMGS="{recipient_phone_number}"\r'.encode())
         user_command = SERRIAL_OBJECT.readline().decode().strip()

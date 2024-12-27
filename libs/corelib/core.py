@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 
-SHEETS_TITLE = "shashwatha-seva-db"
+SHEETS_TITLE = "s2n2s2-db"
 HEADER_ROW = 1
 WORKSHEET = None
 INTERNALHEADER_TO_COLUMNID = {}
@@ -52,6 +52,7 @@ def get_num_cols():
 
 def load_google_sheet():
     gc = gspread.service_account()
+    print("successful till here")
     sheet = gc.open(SHEETS_TITLE)
     global WORKSHEET
     WORKSHEET = sheet.sheet1
@@ -185,7 +186,7 @@ def get_email_body_for_recipient(title, name):
 def get_email_attachement_for_recipient():
     res = []
     standard_image = {}
-    standard_image["path"] = PATH_TO_ROOT_DIR + "\\assets\\images\\standard.jpeg"
+    standard_image["path"] = os.path.join(PATH_TO_IMAGE_ASSETS_DIR, 'standard.jpeg')
     standard_image["name"] = "NalurShankaraNarayana.jpeg"
     res.append(standard_image)
     return res
@@ -230,12 +231,12 @@ def get_email_body_for_admin(name, recipients):
 def get_email_attachement_for_admin():
     res = []
     devotee_image = {}
-    devotee_image["path"] = PATH_TO_TEMP_DIR + "\\" + IMAGE_NAME
+    devotee_image["path"] = os.path.join(PATH_TO_TEMP_DIR, IMAGE_NAME)
     devotee_image["name"] = IMAGE_NAME
     res.append(devotee_image)
     log_file = {}
     log_file["path"] = get_path_to_current_session_log(False)
-    log_file["name"] = get_path_to_current_session_log(False).split("\\")[-1]
+    log_file["name"] = get_path_to_current_session_log(False).split(os.sep)[-1]
     res.append(log_file)
     return res
 
@@ -291,7 +292,7 @@ def dispatch_message_to_admins(recipients):
     """
     Sends notification email to admins.
     """
-    path = PATH_TO_ROOT_DIR + "\\users\\users.json"
+    path = PATH_TO_ROOT_DIR + os.sep + "users" + os.sep + "users.json"
     with open(path, "r") as file:
         data = json.load(file)
         users = data["users"]
