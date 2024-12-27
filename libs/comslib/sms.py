@@ -5,46 +5,41 @@ import time
 PORT = "/dev/ttyS0"
 BAUD_RATE = 115200
 TIME_OUT = 1
-if PI_MODE:
-    global SERRIAL_OBJECT
-    SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
+SERRIAL_OBJECT = None
 
 
 def configure_serial():
     global SERRIAL_OBJECT
-    SERRIAL_OBJECT.write(b"AT+CMGF=1\r")  # Set the SMS message format to text mode
+    SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
+    SERRIAL_OBJECT.write(b"AT+CMGF=1\r")
     user_command = SERRIAL_OBJECT.readline().decode().strip()  # Read the echoed command
-    if DEV_MODE:
-        print(f"\nuser command : {user_command}")
-
+    log_info(f"User Command : {user_command}")
     response = SERRIAL_OBJECT.readline().decode().strip()  # Read the actual response
-    if DEV_MODE:
-        print(f"response : {response}\n")
+    log_info(f"Response : {response}")
+    time.sleep(2)
 
 
 def send_sms_text(recipient_phone_number, sms_message) -> bool:
-    configure_serial()
     if is_valid_phone_number(recipient_phone_number):
+        configure_serial()
         SERRIAL_OBJECT.write(f'AT+CMGS="{recipient_phone_number}"\r'.encode())
         user_command = SERRIAL_OBJECT.readline().decode().strip()
-        if DEV_MODE:
-            print(f"\nuser command : {user_command}")
+        log_info(f"User Command : {user_command}")
         response = SERRIAL_OBJECT.readline().decode().strip()
-        if DEV_MODE:
-            print(f"response : {response}\n")
+        log_info(f"Response : {response}")
+
+        time.sleep(2)
 
         SERRIAL_OBJECT.write(
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
         user_command = SERRIAL_OBJECT.readline().decode().strip()
-        if DEV_MODE:
-            print(f"\nuser command : {user_command}")
+        log_info(f"User command : {user_command}")
         response = SERRIAL_OBJECT.readline().decode().strip()
-        if DEV_MODE:
-            print(f"response : {response}\n")
+        log_info(f"Response : {response}")
 
-        time.sleep(3)
-
+        time.sleep(2)
+        SERRIAL_OBJECT.close()
         log_info(f"SMS to <{recipient_phone_number}> successful.")
         return True
     else:

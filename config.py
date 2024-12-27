@@ -3,7 +3,7 @@ import os
 import shutil
 
 DEV_MODE = True
-PI_MODE = False
+PI_MODE = True
 
 LOG_DIR_NAME = "logs"
 DEV_LOG_DIR_NAME = "dev-logs"
