@@ -52,7 +52,6 @@ def get_num_cols():
 
 def load_google_sheet():
     gc = gspread.service_account()
-    print("successful till here")
     sheet = gc.open(SHEETS_TITLE)
     global WORKSHEET
     WORKSHEET = sheet.sheet1
@@ -186,7 +185,7 @@ def get_email_body_for_recipient(title, name):
 def get_email_attachement_for_recipient():
     res = []
     standard_image = {}
-    standard_image["path"] = os.path.join(PATH_TO_IMAGE_ASSETS_DIR, 'standard.jpeg')
+    standard_image["path"] = os.path.join(PATH_TO_IMAGE_ASSETS_DIR, "standard.jpeg")
     standard_image["name"] = "NalurShankaraNarayana.jpeg"
     res.append(standard_image)
     return res
