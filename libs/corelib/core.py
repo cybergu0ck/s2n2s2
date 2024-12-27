@@ -10,6 +10,8 @@ import numpy as np
 import json
 
 SHEETS_TITLE = "shashwatha-seva-db"
+WORKSHEET_PROD_NAME = "prod"
+WORKSHEET_DEV_NAME = "dev"
 HEADER_ROW = 1
 WORKSHEET = None
 INTERNALHEADER_TO_COLUMNID = {}
@@ -55,9 +57,10 @@ def load_google_sheet():
     sheet = gc.open(SHEETS_TITLE)
     global WORKSHEET
     if DEV_MODE:
-        WORKSHEET = sheet.worksheet("dev")
+        WORKSHEET = sheet.worksheet(WORKSHEET_DEV_NAME)
     else:
-        WORKSHEET = sheet.worksheet("prod")
+        WORKSHEET = sheet.worksheet(WORKSHEET_PROD_NAME)
+
 
 
 def populate_header_to_column_mapping():
@@ -74,6 +77,8 @@ def populate_header_to_column_mapping():
         col_id = id + 1
         INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = col_id
 
+def populate_admins():
+    
 
 def prepare_data():
     """
