@@ -4,33 +4,44 @@ This script automates the process of accessing a Google Sheet, parsing its conte
 
 This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
 """
-
+import inspect
 from config import configure_directories
 from libs.utilslib.utils import *
 from libs.loggerlib.logger import configure_logging_system, log_info
 from libs.corelib.core import (
     prepare_data,
-    get_todays_recepients,
-    save_and_dispatch,
+    get_todays_recipients,
+    save_recipients,
+    dispatch_communications,
 )
 
 
-def setup_environment():
+def setup_environment() -> bool:
     """
     Performs configurations and sets up the environment.
     """
-    configure_directories()
-    configure_logging_system()
+    frame = inspect.currentframe()
+
+    try:
+        configure_directories()
+        configure_logging_system()
+        log_info(f"{get_function_name(frame)} successful.")
+        return True
+    except Exception as e:
+        log_info(f"{get_function_name(frame)} unsuccessful.")
+        return False
 
 
 def main():
     """Main function to execute the daily messaging script."""
-    log_info("Starting todays script execution")
-    setup_environment()
-    prepare_data()
-    recipients = get_todays_recepients()
-    save_and_dispatch(recipients)
-    log_info("Script executed completely")
+    log_info("Script started.")
+    if setup_environment():
+        if prepare_data():
+            recipients = get_todays_recipients()
+            if save_recipients(recipients):
+                if dispatch_communications(recipients):
+                    log_info("Script completed successfully.")
+    log_info("Script completed unsuccessfully.")
 
 
 if __name__ == "__main__":

@@ -43,7 +43,11 @@ def send_sms_text(recipient_phone_number, sms_message) -> bool:
         if DEV_MODE:
             print(f"response : {response}\n")
 
-        time.sleep(5)
+        time.sleep(3)
+
+        log_info(f"SMS to <{recipient_phone_number}> successful.")
         return True
     else:
+        log_info(f"SMS to <{recipient_phone_number}> unsuccessful.")
+        log_info(f"Phone number seems to be invalid.")
         return False

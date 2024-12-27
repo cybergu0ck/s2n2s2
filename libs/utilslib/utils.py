@@ -112,3 +112,7 @@ def is_valid_email(address: str) -> bool:
             address,
         )
     )
+
+
+def get_function_name(frame):
+    return frame.f_code.co_name

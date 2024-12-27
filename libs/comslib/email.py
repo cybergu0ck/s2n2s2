@@ -44,6 +44,9 @@ def send_email(email_address, subject, body, attachements=[], is_html=False) -> 
             # server.sendmail(SENDER_EMAIL_ADDRESS, email_address, message.as_string())
             server.send_message(message)
             server.quit()
+
+        log_info(f"Email to <{email_address}> successful.")
         return True
     else:
+        log_info(f"Email to <{email_address}> unsuccessful.")
         return False
