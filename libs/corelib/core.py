@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 
-SHEETS_TITLE = "s2n2s2-db"
+SHEETS_TITLE = "shashwatha-seva-db"
 HEADER_ROW = 1
 WORKSHEET = None
 INTERNALHEADER_TO_COLUMNID = {}
@@ -54,7 +54,10 @@ def load_google_sheet():
     gc = gspread.service_account()
     sheet = gc.open(SHEETS_TITLE)
     global WORKSHEET
-    WORKSHEET = sheet.sheet1
+    if DEV_MODE:
+        WORKSHEET = sheet.worksheet("dev")
+    else:
+        WORKSHEET = sheet.worksheet("prod")
 
 
 def populate_header_to_column_mapping():
