@@ -28,6 +28,7 @@ def setup_environment() -> bool:
         log_info(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
+        print(e)
         log_info(f"{get_function_name(frame)} unsuccessful.")
         return False
 
