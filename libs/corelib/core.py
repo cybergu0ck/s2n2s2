@@ -390,15 +390,16 @@ def dispatch_messages_to_recipients(recipients) -> bool:
             )
             simple_message = get_simple_message()
             log_info(f"Dispatching SMS to {title} {name}.")
-            if PI_MODE:
+            if PI_MODE and SMS_ENABLED:
                 sucess_sms = send_sms_text(phone_num, simple_message)
 
             log_info(f"Dispatching Email to {title} {name}.")
 
-            subject = "Confirmation : Shashwatha Pooja Seva"
-            body = get_email_body_for_recipient(title, name)
-            attachments = get_email_attachement_for_recipient()
-            success_email = send_email(email_address, subject, body, attachments)
+            if EMAIL_ENABLED:
+                subject = "Confirmation : Shashwatha Pooja Seva"
+                body = get_email_body_for_recipient(title, name)
+                attachments = get_email_attachement_for_recipient()
+                success_email = send_email(email_address, subject, body, attachments)
 
             time.sleep(3)
 
@@ -421,10 +422,11 @@ def dispatch_message_to_admins(recipients) -> bool:
             log_info(
                 f"Admin, Name: {admin.name}, Phone : {admin.phone_number}, Email : {admin.email}."
             )
-            subject = "Daily Notification"
-            attachments = get_email_attachement_for_admin()
-            body = get_email_body_for_admin(admin.name, recipients)
-            send_email(admin.email, subject, body, attachments, True)
+            if EMAIL_ENABLED:
+                subject = "Daily Notification"
+                attachments = get_email_attachement_for_admin()
+                body = get_email_body_for_admin(admin.name, recipients)
+                send_email(admin.email, subject, body, attachments, True)
 
         log_info(f"{get_function_name(frame)} successful.")
         return True
