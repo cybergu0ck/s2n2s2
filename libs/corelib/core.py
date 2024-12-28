@@ -359,7 +359,7 @@ def dispatch_messages_to_recipients(recipients) -> bool:
     frame = inspect.currentframe()
 
     try:
-        log_info(f"Dispatching communications to recipients.")
+        log_info(f"Dispatching messages to recipients.")
         for recipient in recipients:
             title = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1
