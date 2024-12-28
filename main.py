@@ -42,6 +42,7 @@ def main():
             if save_recipients(recipients):
                 if dispatch_communications(recipients):
                     log_info("Script completed successfully.")
+                    return
     log_info("Script completed unsuccessfully.")
 
 
