@@ -3,7 +3,7 @@ import time
 
 PORT = "/dev/ttyS0"
 BAUD_RATE = 115200
-TIME_OUT = 1
+TIME_OUT = 3
 SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 # Send basic AT command, expect the response to be OK
