@@ -45,7 +45,7 @@ print(user_command)
 print(response)
 
 # Send the actual message
-SERRIAL_OBJECT.write(f"{encoded_message}\x1A")
+SERRIAL_OBJECT.write(f"{encoded_message}\x1A".encode())
 time.sleep(3)
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode("utf-8").strip()
