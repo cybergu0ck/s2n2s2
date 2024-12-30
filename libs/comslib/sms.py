@@ -7,6 +7,8 @@ BAUD_RATE = 115200
 TIME_OUT = 1
 SERRIAL_OBJECT = None
 
+# NOTE - If the user_comand itself is "", its better to restart the pi
+
 
 def configure_serial():
     global SERRIAL_OBJECT
