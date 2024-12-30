@@ -7,7 +7,7 @@ TIME_OUT = 1
 SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 # Send basic AT command, expect the response to be OK
-SERRIAL_OBJECT.write(f"AT\r")
+SERRIAL_OBJECT.write(b"AT\r")
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 print(user_command)
