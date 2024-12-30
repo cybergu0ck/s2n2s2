@@ -261,7 +261,7 @@ def save_recipients_as_image(recipients):
     # table.scale(2, 1.3)
     ax.set_axis_off()
 
-    path_to_image = os.path.join(PATH_TO_TEMP_DIR, IMAGE_NAME)
+    path_to_image = os.path.join(PATH_TEMP_DIR, IMAGE_NAME)
     plt.savefig(path_to_image, dpi=300)
     log_info(f"Recipient data saved as image at {path_to_image}.")
 
@@ -295,7 +295,7 @@ def get_email_body_for_recipient(title, name):
 def get_email_attachement_for_recipient():
     res = []
     standard_image = {}
-    standard_image["path"] = os.path.join(PATH_TO_IMAGE_ASSETS_DIR, "standard.jpeg")
+    standard_image["path"] = os.path.join(PATH_IMAGE_ASSETS_DIR, "standard.jpeg")
     standard_image["name"] = "NalurShankaraNarayana.jpeg"
     res.append(standard_image)
     return res
@@ -339,7 +339,7 @@ def get_email_body_for_admin(name, recipients):
 
 def get_email_attachement_for_admin():
     res = []
-    path_to_img = os.path.join(PATH_TO_TEMP_DIR, IMAGE_NAME)
+    path_to_img = os.path.join(PATH_TEMP_DIR, IMAGE_NAME)
     if os.path.exists(path_to_img):
         recipients_image = {}
         recipients_image["path"] = path_to_img
