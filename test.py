@@ -18,6 +18,8 @@ time.sleep(2)
 SERRIAL_OBJECT.write(b"AT+CMGF=1\r")
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
+print(user_command)
+print(response)
 time.sleep(2)
 
 phone_num = "9632448895"
@@ -31,5 +33,7 @@ time.sleep(2)
 SERRIAL_OBJECT.write(f"{msg}\x1A".encode())  # \x1A is the ASCII code for Ctrl+Z
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
+print(user_command)
+print(response)
 time.sleep(2)
 SERRIAL_OBJECT.close()
