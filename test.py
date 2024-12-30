@@ -22,21 +22,14 @@ print(user_command)
 print(response)
 time.sleep(2)
 
-SERRIAL_OBJECT.write(f'AT+CMGF=0"\r'.encode())
-user_command = SERRIAL_OBJECT.readline().decode().strip()
-response = SERRIAL_OBJECT.readline().decode().strip()
-time.sleep(2)
-
-
-phone_num = "9632448895"
+phone_num = "+919632448895"
 msg = "ಅತ್ಮೀಯ ಶ್ರೀ ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ಸ್ವಾಮಿಯ ಸೇವಾಕರ್ತರೆ"
-# msg = "hi"
 # Sending Message
 SERRIAL_OBJECT.write(f'AT+CMGS="{phone_num}"\r'.encode())
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 time.sleep(2)
-SERRIAL_OBJECT.write(f"{msg}\x1A".encode())  # \x1A is the ASCII code for Ctrl+Z
+SERRIAL_OBJECT.write(f"{msg}\x1A".encode("utf-8"))  # \x1A is the ASCII code for Ctrl+Z
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 print(user_command)
