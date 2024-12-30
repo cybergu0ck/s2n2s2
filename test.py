@@ -6,16 +6,12 @@ BAUD_RATE = 115200
 TIME_OUT = 3
 SERRIAL_OBJECT = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
-# Send basic AT command, expect the response to be OK
-SERRIAL_OBJECT.write(b"AT\r")
-user_command = SERRIAL_OBJECT.readline().decode().strip()
-response = SERRIAL_OBJECT.readline().decode().strip()
-print(user_command)
-print(response)
-time.sleep(2)
 
-# Setting the mode or something
-SERRIAL_OBJECT.write(b"AT+CMGF=0\r")
+def unicode_to_hex(text):
+    return "".join(f"{ord(char):04x}" for char in text).upper()
+
+
+SERRIAL_OBJECT.write(b"ATZ\r")
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 print(user_command)
@@ -29,15 +25,33 @@ print(user_command)
 print(response)
 time.sleep(2)
 
+SERRIAL_OBJECT.write(b"AT+CSMP=17,168,0,8\r")
+user_command = SERRIAL_OBJECT.readline().decode().strip()
+response = SERRIAL_OBJECT.readline().decode().strip()
+print(user_command)
+print(response)
+time.sleep(2)
+
+SERRIAL_OBJECT.write(b"AT+CMGF=1\r")
+user_command = SERRIAL_OBJECT.readline().decode().strip()
+response = SERRIAL_OBJECT.readline().decode().strip()
+print(user_command)
+print(response)
+time.sleep(2)
+
+
 phone_num = "+919632448895"
-msg = "0x59 0x6f"
+msg = "ಅತ್ಮೀಯ ಶ್ರೀ ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ಸ್ವಾಮಿಯ ಸೇವಾಕರ್ತರೆ,ತಮ್ಮ ಶಾಶ್ವತ ಸೇವಾ ಪೂಜೆಯನ್ನು ಇಂದು ಶ್ರೀ ಸ್ವಾಮಿಯ ಸನ್ನಿಧಿಯಲ್ಲಿ ಭಕ್ತಿ ಪೂರ್ವಕವಾಗಿ ನೆರವೇರಿಸಲಾಗಿದೆ."
+
+phone_num_hez = unicode_to_hex(phone_num)
+msg_hex = unicode_to_hex(msg)
 
 # Sending Message
-SERRIAL_OBJECT.write(f'AT+CMGS="{phone_num}"\r'.encode())
+SERRIAL_OBJECT.write(f'AT+CMGS="{phone_num_hez}"\r'.encode())
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 time.sleep(2)
-SERRIAL_OBJECT.write(f"{msg}\x1A".encode())  # \x1A is the ASCII code for Ctrl+Z
+SERRIAL_OBJECT.write(f"{msg_hex}\x1A".encode())  # \x1A is the ASCII code for Ctrl+Z
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 print(user_command)
