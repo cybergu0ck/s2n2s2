@@ -30,30 +30,49 @@ print(response)
 time.sleep(2)
 
 phone_num = "+919632448895"
+msg = "0x59 0x6f"
 
-# Prepare the message in Kannada
-kannada_message = "ನಮಸ್ಕಾರ"  # This means "Hello"
-encoded_message = kannada_message.encode(
-    "utf-16-be"
-)  # Encode in UCS2 (UTF-16 Big Endian)
-
-SERRIAL_OBJECT.write(f"AT+CMGS={len(encoded_message)//2}".encode() + b"\r")
-time.sleep(1)  # Wait for response
+# Sending Message
+SERRIAL_OBJECT.write(f'AT+CMGS="{phone_num}"\r'.encode())
+user_command = SERRIAL_OBJECT.readline().decode().strip()
+response = SERRIAL_OBJECT.readline().decode().strip()
+time.sleep(2)
+SERRIAL_OBJECT.write(f"{msg}\x1A".encode())  # \x1A is the ASCII code for Ctrl+Z
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 print(user_command)
 print(response)
-
-# Send the actual message
-SERRIAL_OBJECT.write(f"{encoded_message}\x1A".encode())
-time.sleep(3)
-user_command = SERRIAL_OBJECT.readline().decode().strip()
-response = SERRIAL_OBJECT.readline().decode("utf-8").strip()
-print("Final Response:", response)
-print(user_command)
+response = SERRIAL_OBJECT.readline().decode().strip()
 print(response)
-
+response = SERRIAL_OBJECT.readline().decode().strip()
+print(response)
+time.sleep(2)
 SERRIAL_OBJECT.close()
+
+
+# # Prepare the message in Kannada
+# kannada_message = "ನಮಸ್ಕಾರ"  # This means "Hello"
+# encoded_message = kannada_message.encode(
+#     "utf-16-be"
+# )  # Encode in UCS2 (UTF-16 Big Endian)
+
+# SERRIAL_OBJECT.write(f"AT+CMGS={len(encoded_message)//2}".encode() + b"\r")
+# time.sleep(1)  # Wait for response
+# user_command = SERRIAL_OBJECT.readline().decode().strip()
+# response = SERRIAL_OBJECT.readline().decode().strip()
+# print(user_command)
+# print(response)
+
+# # Send the actual message
+# SERRIAL_OBJECT.write(f"{encoded_message}\x1A".encode())
+# time.sleep(3)
+# user_command = SERRIAL_OBJECT.readline().decode().strip()
+# response = SERRIAL_OBJECT.readline().decode("utf-8").strip()
+# print("Final Response:", response)
+# print(user_command)
+# print(response)
+
+# SERRIAL_OBJECT.close()
 
 
 # # Sending Message
