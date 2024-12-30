@@ -15,7 +15,7 @@ print(response)
 time.sleep(2)
 
 # Setting the mode or something
-SERRIAL_OBJECT.write(b"AT+CMGF=1\r")
+SERRIAL_OBJECT.write(b"AT+CMGF=0\r")
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 print(user_command)
@@ -37,32 +37,22 @@ encoded_message = kannada_message.encode(
     "utf-16-be"
 )  # Encode in UCS2 (UTF-16 Big Endian)
 
-
-def send_at_command(command):
-    SERRIAL_OBJECT.write(command.encode() + b"\r")
-    time.sleep(1)  # Wait for response
-    user_command = SERRIAL_OBJECT.readline().decode().strip()
-    response = SERRIAL_OBJECT.readline().decode().strip()
-    print(user_command)
-    print(response)
-
-
-# Send the SMS command
-send_at_command(
-    f"AT+CMGS={len(encoded_message)//2}"
-)  # Length of the message in bytes (UCS2 uses 2 bytes per character)
-time.sleep(1)  # Wait for prompt
+SERRIAL_OBJECT.write(f"AT+CMGS={len(encoded_message)//2}".encode() + b"\r")
+time.sleep(1)  # Wait for response
+user_command = SERRIAL_OBJECT.readline().decode().strip()
+response = SERRIAL_OBJECT.readline().decode().strip()
+print(user_command)
+print(response)
 
 # Send the actual message
-SERRIAL_OBJECT.write(encoded_message)
-SERRIAL_OBJECT.write(b"\x1A")  # Send Ctrl+Z to indicate end of message
-
-# Wait for response
+SERRIAL_OBJECT.write(f"{encoded_message}\x1A")
 time.sleep(3)
+user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 print("Final Response:", response)
+print(user_command)
+print(response)
 
-# Close the serial connection
 SERRIAL_OBJECT.close()
 
 
