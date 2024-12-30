@@ -5,7 +5,9 @@
 
 ## Todo
 
-1. Add sim center number in the code
+1. Add variables to enable and disable sms and email
+1. Seperate logs into info and error
+1.
 
 <br>
 <br>
