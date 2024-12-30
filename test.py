@@ -23,8 +23,8 @@ print(response)
 time.sleep(2)
 
 phone_num = "9632448895"
-msg = "ಅತ್ಮೀಯ ಶ್ರೀ ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ಸ್ವಾಮಿಯ ಸೇವಾಕರ್ತರೆ,\
-ತಮ್ಮ ಶಾಶ್ವತ ಸೇವಾ ಪೂಜೆಯನ್ನು ಇಂದು ಶ್ರೀ ಸ್ವಾಮಿಯ ಸನ್ನಿಧಿಯಲ್ಲಿ ಭಕ್ತಿ ಪೂರ್ವಕವಾಗಿ ನೆರವೇರಿಸಲಾಗಿದೆ"
+msg = "ಅತ್ಮೀಯ ಶ್ರೀ ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ಸ್ವಾಮಿಯ ಸೇವಾಕರ್ತರೆ"
+msg = "hi"
 # Sending Message
 SERRIAL_OBJECT.write(f'AT+CMGS="{phone_num}"\r'.encode())
 user_command = SERRIAL_OBJECT.readline().decode().strip()
@@ -32,6 +32,9 @@ response = SERRIAL_OBJECT.readline().decode().strip()
 time.sleep(2)
 SERRIAL_OBJECT.write(f"{msg}\x1A".encode())  # \x1A is the ASCII code for Ctrl+Z
 user_command = SERRIAL_OBJECT.readline().decode().strip()
+response = SERRIAL_OBJECT.readline().decode().strip()
+print(user_command)
+print(response)
 response = SERRIAL_OBJECT.readline().decode().strip()
 print(user_command)
 print(response)
