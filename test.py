@@ -15,7 +15,7 @@ print(response)
 time.sleep(2)
 
 # Setting the mode or something
-SERRIAL_OBJECT.write(f"AT+CMGF=1\r")
+SERRIAL_OBJECT.write(b"AT+CMGF=1\r")
 user_command = SERRIAL_OBJECT.readline().decode().strip()
 response = SERRIAL_OBJECT.readline().decode().strip()
 time.sleep(2)
