@@ -22,7 +22,7 @@ def get_service_provider() -> str:
         log_debug(f"Response : {response}")
     else:
         log_warning(f"Unable to fetch service provider detail.")
-        log_info(f"Response : {response}")
+        log_warning(f"Response : {response}")
     return res
 
 
@@ -56,13 +56,13 @@ def check_signal_strength() -> str:
             else:
                 res = "Poor signal strength."
                 log_warning(res)
-                log_info(f"Response : {response}")
+                log_warning(f"Response : {response}")
         except Exception as e:
+            log_error(f"Error in code.")
             print(f"Exception: {e}")
-            log_info(f"Error in code.")
     else:
         log_warning(f"Unable to fetch network signal strength detail.")
-        log_info(f"Response : {response}")
+        log_warning(f"Response : {response}")
     return res
 
 
@@ -78,7 +78,7 @@ def is_module_functioning() -> bool:
         return True
     else:
         log_warning(f"Module is not functioning correctly, restart is suggested.")
-        log_info(f"Response : {response}")
+        log_warning(f"Response : {response}")
         return False
 
 
@@ -91,7 +91,7 @@ def is_sim_inserted() -> bool:
     response = LTE_MODULE.readline().decode().strip()
     if response == "+CME ERROR: SIM not inserted":
         log_warning(f"Sim not inserted, ensure sim is properly inserted.")
-        log_info(f"Response : {response}")
+        log_warning(f"Response : {response}")
         return False
     else:
         log_debug(f"Response : {response}")
@@ -112,7 +112,7 @@ def is_network_registered() -> bool:
             log_warning(
                 f" Not registered,ME is not currently searching a new operator to register to."
             )
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
         elif status == "1":
             log_debug(f"Registered to home network.")
@@ -120,27 +120,27 @@ def is_network_registered() -> bool:
             return True
         elif status == "2":
             log_warning(f"Registered to home network.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
         elif status == "3":
             log_warning(f"Registration denied.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
         elif status == "4":
             log_warning(f"Unknown response while fetching network registration.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
         elif status == "5":
             log_warning(f"Registered, roaming.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return True
         elif status == "6":
             log_warning(f"Registered, sms only.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return True
     else:
         log_warning(f"Unable to fetch network registation detail.")
-        log_info(f"Response : {response}")
+        log_warning(f"Response : {response}")
         return False
 
 
@@ -157,7 +157,7 @@ def set_sms_message_format(format) -> bool:
             return True
         else:
             log_warning(f"SMS format not set.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
     elif format == "1":
         LTE_MODULE.write("AT+CMGF=1\r")
@@ -170,7 +170,7 @@ def set_sms_message_format(format) -> bool:
             return True
         else:
             log_warning(f"SMS format not set.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
     else:
         log_error(
@@ -191,7 +191,7 @@ def set_character_set(character_set: str) -> bool:
             return True
         else:
             log_warning("Character set not set.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
     elif character_set == "IRA":
         LTE_MODULE.write(b'AT+CSCS="IRA"\r')
@@ -204,7 +204,7 @@ def set_character_set(character_set: str) -> bool:
             return True
         else:
             log_warning("Character set not set.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
     elif character_set == "GSM":
         LTE_MODULE.write(b'AT+CSCS="GSM"\r')
@@ -217,7 +217,7 @@ def set_character_set(character_set: str) -> bool:
             return True
         else:
             log_warning("Character set not set.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
     else:
         log_error(
@@ -239,7 +239,7 @@ def set_text_mode_parameters(is_non_english=False):
             return True
         else:
             log_warning("Text mode parameters not set.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
     else:
         LTE_MODULE.write(b"AT+CSMP=17,168,0,0\r")
@@ -252,7 +252,7 @@ def set_text_mode_parameters(is_non_english=False):
             return True
         else:
             log_warning("Text mode parameters not set.")
-            log_info(f"Response : {response}")
+            log_warning(f"Response : {response}")
             return False
 
 
@@ -269,24 +269,24 @@ def send_sms(recipient_phone_number, sms_message, is_hex=False) -> bool:
             )  # \x1A is the ASCII code for Ctrl+Z
             time.sleep(2)
             at_command = LTE_MODULE.readline().decode().strip()
-            log_info(f"AT Command with message : {at_command}")
+            log_debug(f"AT Command with message : {at_command}")
             response = LTE_MODULE.readline().decode().strip()
             if response.startswith("+CMGS:"):
                 response = LTE_MODULE.readline().decode().strip()
                 response = LTE_MODULE.readline().decode().strip()
                 if response == "OK":
-                    log_info(f"Response : {response}")
+                    log_debug(f"Response : {response}")
                 else:
                     log_warning(f"Message not sent.")
-                    log_info(f"Response : {response}")
+                    log_warning(f"Response : {response}")
                     return False
             else:
                 log_warning(f"Message not sent.")
-                log_info(f"Response : {response}")
+                log_warning(f"Response : {response}")
                 return False
     else:
         log_warning(f"Message not sent.")
-        log_info(f"Response : {response}")
+        log_warning(f"Response : {response}")
         return False
 
 

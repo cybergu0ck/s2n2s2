@@ -89,7 +89,6 @@ def load_google_sheet() -> bool:
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        print(e)
         log_error(f"{get_function_name(frame)} unsuccessful.")
         log_error(f"Exception : {e}")
         return False
@@ -116,7 +115,6 @@ def populate_header_to_column_mapping() -> bool:
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        print(e)
         log_error(f"{get_function_name(frame)} unsuccessful.")
         log_error(f"Error found in internal header mapping code.")
         log_error(
@@ -221,7 +219,6 @@ def get_todays_recipients() -> list[list[str]]:
         preprocess_retrived_data(res)
         log_debug(f"{get_function_name(frame)} successful.")
     except Exception as e:
-        print(e)
         log_error(f"{get_function_name(frame)} unsuccessful.")
         log_error(f"Exception : {e}")
     return res
@@ -287,8 +284,8 @@ def save_recipients(recipients) -> bool:
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        print(e)
         log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
         return False
 
 
@@ -438,8 +435,8 @@ def dispatch_messages_to_recipients(recipients) -> bool:
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        print(e)
         log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
         return False
 
 
@@ -465,7 +462,6 @@ def dispatch_message_to_admins(recipients) -> bool:
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        print(e)
         log_error(f"{get_function_name(frame)} unsuccessful.")
         log_error(f"Exception : {e}")
         return False
