@@ -14,6 +14,7 @@ def is_module_functioning() -> bool:
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to check if module is functioning : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
+    time.sleep(2)
     if response == "OK":
         print(f"Response : {response}")
         return True
@@ -30,6 +31,7 @@ def is_sim_inserted() -> bool:
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to check if sim is inserted : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
+    time.sleep(2)
     if response == "+CME ERROR: SIM not inserted":
         print(f"Sim not inserted, ensure sim is properly inserted.")
         print(f"Response : {response}")
@@ -41,6 +43,7 @@ def is_sim_inserted() -> bool:
 
 def is_network_registered() -> bool:
     """Returns True if the simcom lte module is registred to a network, else False."""
+    time.sleep(2)
     LTE_MODULE.write(b"AT+CREG?\r")
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to check network registration status: {at_command}")
