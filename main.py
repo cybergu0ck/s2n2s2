@@ -51,10 +51,9 @@ def main():
             global RECIPIENTS
             RECIPIENTS = get_todays_recipients()
             if save_recipients(RECIPIENTS):
-                if len(RECIPIENTS) > 0:
-                    if dispatch_messages_to_recipients(RECIPIENTS):
-                        log_debug("Script completed successfully.")
-                        return
+                if dispatch_messages_to_recipients(RECIPIENTS):
+                    log_debug("Script completed successfully.")
+                    return
     log_error("Script completed unsuccessfully.")
 
 
