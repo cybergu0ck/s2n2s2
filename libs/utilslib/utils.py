@@ -3,7 +3,7 @@ from datetime import datetime
 import re
 from re import match
 
-TODAY = datetime.today().strftime("%d/%m")
+TODAY = datetime.today().strftime("%d/%m/%Y")
 TODAY_FOR_LOG = datetime.today().strftime("%Y-%m-%d")
 
 

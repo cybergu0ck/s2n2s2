@@ -212,7 +212,7 @@ def get_todays_recipients() -> list[list[str]]:
         )
         for row_id, cell_value in enumerate(date_column_values[1:], start=2):
             if is_valid_date(cell_value):
-                if cell_value[:5] == TODAY:
+                if cell_value[:5] == TODAY[:5]:
                     row_values = WORKSHEET.row_values(row_id)
                     res.append(row_values)
 
