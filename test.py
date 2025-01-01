@@ -30,14 +30,16 @@ def is_sim_inserted() -> bool:
     LTE_MODULE.write(b"AT+CIMI\r")
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to check if sim is inserted : {at_command}")
-    response = LTE_MODULE.readline().decode().strip()
+    response_imsi = LTE_MODULE.readline().decode().strip()
+    response_space = LTE_MODULE.readline().decode().strip()
+    response_ok = LTE_MODULE.readline().decode().strip()
     time.sleep(2)
-    if response == "+CME ERROR: SIM not inserted":
+    if response_imsi == "+CME ERROR: SIM not inserted":
         print(f"Sim not inserted, ensure sim is properly inserted.")
-        print(f"Response : {response}")
+        print(f"Response : {response_imsi}")
         return False
     else:
-        print(f"Response : {response}")
+        print(f"Response : {response_imsi}")
         return True
 
 
