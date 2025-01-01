@@ -59,6 +59,14 @@ def configure_logging_system():
     LOGGER.addHandler(info_handler)
     LOGGER.debug("Logger system configured successfully")
 
+    console_handler = logging.StreamHandler()
+    console_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    console_handler.setFormatter(console_formatter)
+    console_handler.setLevel(logging.DEBUG)
+    LOGGER.addHandler(console_handler)
+
+    LOGGER.debug("Logger system configured successfully")
+
 
 def log_warning(warning):
     LOGGER.warning(warning)
