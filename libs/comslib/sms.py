@@ -101,10 +101,10 @@ def is_sim_inserted() -> bool:
 def is_network_registered() -> bool:
     """Returns True if the simcom lte module is registred to a network, else False."""
     LTE_MODULE.write(b"AT+CREG?\r")
-    time.sleep(2)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check network registration status: {at_command}")
     response = LTE_MODULE.readline().decode().strip()
+    time.sleep(2)
     # Successful output will be like  "+CREG: 0,1"
     if response.startswith("+CREG:"):
         status = response.split(",")[1]
