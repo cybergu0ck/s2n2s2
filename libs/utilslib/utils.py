@@ -3,7 +3,7 @@ from datetime import datetime
 import re
 from re import match
 
-TODAY = datetime.today().strftime("%d/%m/%Y")
+TODAY = datetime.today().strftime("%d/%m")
 TODAY_FOR_LOG = datetime.today().strftime("%Y-%m-%d")
 
 
@@ -116,3 +116,7 @@ def is_valid_email(address: str) -> bool:
 
 def get_function_name(frame):
     return frame.f_code.co_name
+
+
+def unicode_to_hex(text):
+    return "".join(f"{ord(char):04x}" for char in text).upper()

@@ -9,3 +9,4 @@
 |                            | AT+CSPN? | get the service provider from the sim | +CSPN: <spn>,<display mode>              |      |
 |                            | AT+CREG? | To get network registration status    | +CREG:<n>,<stat>                         |      |
 |                            | AT+CSQ   | get the signal strength               | +CSQ:<rssi>,<ber>                        |      |
+|                            | AT+CSCA? | gives the phone number?               |                                          |      |

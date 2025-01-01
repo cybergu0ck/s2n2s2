@@ -42,11 +42,13 @@ def send_email(email_address, subject, body, attachements=[], is_html=False) -> 
         with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as server:
             server.login(SENDER_EMAIL_ADDRESS, SENDER_EMAIL_KEY)
             # server.sendmail(SENDER_EMAIL_ADDRESS, email_address, message.as_string())
-            server.send_message(message)
+            server.send_message(
+                message
+            )  # TODO - See if I can get any confirmation on successful email dispatch here
             server.quit()
 
-        log_info(f"Email to <{email_address}> successful.")
+        log_debug(f"Email to <{email_address}> successful.")
         return True
     else:
-        log_info(f"Email to <{email_address}> unsuccessful.")
+        log_warning(f"<{email_address}> is an invalid email address.")
         return False

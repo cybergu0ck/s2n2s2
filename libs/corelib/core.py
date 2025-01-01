@@ -1,6 +1,6 @@
 from . import *
 from libs.comslib.email import send_email
-from libs.comslib.sms import send_sms_text
+from libs.comslib.sms import dispatch_sms, close_serial
 import gspread
 import time
 import inspect
@@ -50,6 +50,7 @@ class SheetsHeader(Enum):
     REGISTERED_PHONE_NUMBER = auto()
     REGISTERED_WHATSAPP_NUMBER = auto()
     REGISTERED_EMAIL = auto()
+    REGISTERED_LANGUAGE = auto()
 
 
 sheetsheader_to_internalreference = {
@@ -64,6 +65,7 @@ sheetsheader_to_internalreference = {
     "Phone Number": SheetsHeader.REGISTERED_PHONE_NUMBER,
     "Whatsapp Number": SheetsHeader.REGISTERED_WHATSAPP_NUMBER,
     "Email Address": SheetsHeader.REGISTERED_EMAIL,
+    "Language": SheetsHeader.REGISTERED_LANGUAGE,
 }
 
 
@@ -84,12 +86,12 @@ def load_google_sheet() -> bool:
             WORKSHEET = sheet.worksheet(WORKSHEET_PROD_NAME)
         global ADMIN_WORKSHEET
         ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_ADMIN_NAME)
-        log_info(f"{get_function_name(frame)} successful.")
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
         print(e)
-        log_info(f"{get_function_name(frame)} unsuccessful.")
-        log_info(f"Exception : {e}")
+        log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
         return False
 
 
@@ -111,16 +113,16 @@ def populate_header_to_column_mapping() -> bool:
             INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = (
                 col_id
             )
-        log_info(f"{get_function_name(frame)} successful.")
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
         print(e)
-        log_info(f"{get_function_name(frame)} unsuccessful.")
-        log_info(f"Error found in internal header mapping code.")
-        log_info(
+        log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Error found in internal header mapping code.")
+        log_error(
             f"Check if the header names in the worksheet and in sheetsheader_to_internalreference consistant."
         )
-        log_info(f"Exception : {e}")
+        log_error(f"Exception : {e}")
         return False
 
 
@@ -129,11 +131,11 @@ def validate_admin_worksheet_header_integrity() -> bool:
 
     header_row = ADMIN_WORKSHEET.row_values(1)
     if header_row == ADMIN_WORKHEET_HEADER_INTEGRITY:
-        log_info(f"{get_function_name(frame)} successful.")
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     else:
-        log_info(f"{get_function_name(frame)} unsuccessful. ")
-        log_info(f"The admin workheet header seems to be modified.")
+        log_error(f"{get_function_name(frame)} unsuccessful. ")
+        log_error(f"The admin workheet header seems to be modified.")
         return False
 
 
@@ -149,13 +151,13 @@ def populate_admin_list() -> bool:
         ADMINS.append(admin_obj)
 
     if len(ADMINS) == 0:
-        log_info(f"{get_function_name(frame)} unsuccessful.")
-        log_info(f"Fetched zero admin from the admin worksheet.")
-        log_info(f"Early termination as atleast one admin is needed to proceed.")
+        log_warning(f"{get_function_name(frame)} unsuccessful.")
+        log_warning(f"Fetched zero admin from the admin worksheet.")
+        log_warning(f"Early termination as atleast one admin is needed to proceed.")
         return False
     else:
         # STUB - log the list of admins here
-        log_info(f"{get_function_name(frame)} successful.")
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
 
 
@@ -169,10 +171,10 @@ def prepare_data() -> bool:
         if validate_admin_worksheet_header_integrity():
             if populate_admin_list():
                 if populate_header_to_column_mapping():
-                    log_info(f"{get_function_name(frame)} successful.")
+                    log_debug(f"{get_function_name(frame)} successful.")
                     return True
 
-    log_info(f"{get_function_name(frame)} unsuccessful.")
+    log_error(f"{get_function_name(frame)} unsuccessful.")
     return False
 
 
@@ -200,22 +202,26 @@ def get_todays_recipients() -> list[list[str]]:
         list: A list of rows containing recipient data where the registered date matches today's date.
         example : [['1','Ramesh', 'ramesh@email.com'],['19','Suresh', 'suresh@email.com'] ]
     """
-    # REVIEW - How to ensure get_todays_recipients is functioning correctly, its the most crucial function call.
     frame = inspect.currentframe()
-    log_info(f"{get_function_name(frame)} called.")
+    log_debug(f"{get_function_name(frame)} called.")
 
     res = []
-    date_column_values = WORKSHEET.col_values(
-        INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_DATE]
-    )
-    for row_id, cell_value in enumerate(date_column_values[1:], start=2):
-        if is_valid_date(cell_value):
-            if cell_value == TODAY:
-                row_values = WORKSHEET.row_values(row_id)
-                res.append(row_values)
+    try:
+        date_column_values = WORKSHEET.col_values(
+            INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_DATE]
+        )
+        for row_id, cell_value in enumerate(date_column_values[1:], start=2):
+            if is_valid_date(cell_value):
+                if cell_value[:5] == TODAY:
+                    row_values = WORKSHEET.row_values(row_id)
+                    res.append(row_values)
 
-    preprocess_retrived_data(res)
-    log_info(f"{get_function_name(frame)} successful.")
+        preprocess_retrived_data(res)
+        log_debug(f"{get_function_name(frame)} successful.")
+    except Exception as e:
+        print(e)
+        log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
     return res
 
 
@@ -229,7 +235,7 @@ def log_todays_recipients(recipients):
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1
             ]
             info += f"{index}.{name}, "
-    log_info(info)
+    log_debug(info)
 
 
 def get_header_row():
@@ -245,7 +251,7 @@ def get_header_row():
 
 def save_recipients_as_image(recipients):
     if len(recipients) == 0:
-        log_info(f"Recipient data not saved as image as it is empty.")
+        log_debug(f"Recipient data not saved as image as it is empty.")
         return
     data = recipients.copy()
     header_row = get_header_row()
@@ -263,7 +269,7 @@ def save_recipients_as_image(recipients):
 
     path_to_image = os.path.join(PATH_TEMP_DIR, IMAGE_NAME)
     plt.savefig(path_to_image, dpi=300)
-    log_info(f"Recipient data saved as image at {path_to_image}.")
+    log_debug(f"Recipient data saved as image at {path_to_image}.")
 
 
 def save_recipients(recipients) -> bool:
@@ -276,16 +282,20 @@ def save_recipients(recipients) -> bool:
         log_todays_recipients(recipients)
         save_recipients_as_image(recipients)
 
-        log_info(f"{get_function_name(frame)} successful.")
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
         print(e)
-        log_info(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"{get_function_name(frame)} unsuccessful.")
         return False
 
 
-def get_simple_message():
-    return "Dear devotee of Lord Nalur Shankara Narayana Swamy, your Shashwatha Pooja Seva is performed today."
+def get_simple_kannada_message():
+    return "ನಿಮ್ಮ ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ದೇವರ ಶಾಶ್ವತ ಪೂಜಾ ಸೇವೆ ಇಂದು ನಡೆಯಲಿದೆ"
+
+
+def get_simple_english_message():
+    return "Dear devotee of Lord Nalur Shankara Narayana, your Shashwatha Pooja Seva is performed today."
 
 
 def get_email_body_for_recipient(title, name):
@@ -345,10 +355,15 @@ def get_email_attachement_for_admin():
         recipients_image["path"] = path_to_img
         recipients_image["name"] = IMAGE_NAME
         res.append(recipients_image)
-    log_file = {}
-    log_file["path"] = get_path_to_current_session_log(False)
-    log_file["name"] = get_path_to_current_session_log(False).split(os.sep)[-1]
-    res.append(log_file)
+    log_info_file = {}
+    log_info_file["path"] = get_path_to_current_session_log(False)
+    log_info_file["name"] = get_path_to_current_session_log(False).split(os.sep)[-1]
+    res.append(log_info_file)
+    log_debug_file = {}
+    log_debug_file["path"] = get_path_to_current_session_log(True)
+    log_debug_file["name"] = get_path_to_current_session_log(True).split(os.sep)[-1]
+    res.append(log_debug_file)
+
     return res
 
 
@@ -359,7 +374,7 @@ def dispatch_messages_to_recipients(recipients) -> bool:
     frame = inspect.currentframe()
 
     try:
-        log_info(f"Dispatching messages to recipients.")
+        log_debug(f"Dispatching messages to recipients.")
         for recipient in recipients:
             title = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1
@@ -384,30 +399,45 @@ def dispatch_messages_to_recipients(recipients) -> bool:
             nakshatra = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAKSHATRA] - 1
             ]
+            language = recipient[
+                INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_LANGUAGE] - 1
+            ]
 
-            log_info(
+            log_debug(
                 f"Recipient, Name: {title} {name}, Phone : {phone_num}, Email : {email_address}, Gotra : {gotra}, Rashi : {rashi}, Nakshatra : {nakshatra}."
             )
-            simple_message = get_simple_message()
-            log_info(f"Dispatching SMS to {title} {name}.")
             if PI_MODE and SMS_ENABLED:
-                sucess_sms = send_sms_text(phone_num, simple_message)
-
-            log_info(f"Dispatching Email to {title} {name}.")
+                log_debug(f"Dispatching SMS to {title} {name}.")
+                is_kannada = True if language == "Kannada" else False
+                simple_message = (
+                    get_simple_kannada_message()
+                    if is_kannada
+                    else get_simple_english_message()
+                )
+                success_sms = dispatch_sms(phone_num, simple_message, is_kannada)
+                if success_sms:
+                    log_debug(f"Dispatching SMS to {title} {name} successful.")
+                else:
+                    log_warning(f"Dispatching SMS to {title} {name} unsuccessful.")
+                    # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
 
             if EMAIL_ENABLED:
+                log_debug(f"Dispatching Email to {title} {name}.")
                 subject = "Confirmation : Shashwatha Pooja Seva"
                 body = get_email_body_for_recipient(title, name)
                 attachments = get_email_attachement_for_recipient()
                 success_email = send_email(email_address, subject, body, attachments)
-
-            time.sleep(3)
-
-        log_info(f"{get_function_name(frame)} successful.")
+                if success_email:
+                    log_debug(f"Dispatching Email to {title} {name} successful.")
+                else:
+                    log_warning(f"Dispatching Email to {title} {name} unsuccessful.")
+                    # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
+            time.sleep(2)
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
         print(e)
-        log_info(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"{get_function_name(frame)} unsuccessful.")
         return False
 
 
@@ -418,33 +448,40 @@ def dispatch_message_to_admins(recipients) -> bool:
     frame = inspect.currentframe()
 
     try:
-        log_info(f"Dispatching communications to admins.")
+        log_debug(f"Dispatching communications to admins.")
         for admin in ADMINS:
-            log_info(
+            log_debug(
                 f"Admin, Name: {admin.name}, Phone : {admin.phone_number}, Email : {admin.email}."
             )
             if EMAIL_ENABLED:
                 subject = "Daily Notification"
                 attachments = get_email_attachement_for_admin()
                 body = get_email_body_for_admin(admin.name, recipients)
+                # TODO- get two email body one clean one and one with message saying relay on manual as there are warning
                 send_email(admin.email, subject, body, attachments, True)
 
-        log_info(f"{get_function_name(frame)} successful.")
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
         print(e)
-        log_info(f"{get_function_name(frame)} unsuccessful.")
-        log_info(f"Exception : {e}")
+        log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
         return False
 
 
-def dispatch_communications(recipients) -> bool:
+def perform_cleanup():
     frame = inspect.currentframe()
+    close_serial()
+    log_debug(f"{get_function_name(frame)} successful.")
 
-    if dispatch_messages_to_recipients(recipients):
-        if dispatch_message_to_admins(recipients):
-            log_info(f"{get_function_name(frame)} successful.")
-            return True
 
-    log_info(f"{get_function_name(frame)} unsuccessful.")
-    return False
+# def dispatch_communications(recipients) -> bool:
+#     frame = inspect.currentframe()
+
+#     if dispatch_messages_to_recipients(recipients):
+#         if dispatch_message_to_admins(recipients):
+#             log_debug(f"{get_function_name(frame)} successful.")
+#             return True
+
+#     log_errror(f"{get_function_name(frame)} unsuccessful.")
+#     return False

@@ -7,13 +7,23 @@ This script is intended to be executed in a controlled environment where it can 
 import inspect
 from config import configure_directories
 from libs.utilslib.utils import *
-from libs.loggerlib.logger import configure_logging_system, log_info
+from libs.loggerlib.logger import (
+    configure_logging_system,
+    log_info,
+    log_error,
+    log_debug,
+)
 from libs.corelib.core import (
     prepare_data,
     get_todays_recipients,
     save_recipients,
-    dispatch_communications,
+    dispatch_messages_to_recipients,
+    perform_cleanup,
+    dispatch_message_to_admins,
 )
+
+
+RECIPIENTS = None
 
 
 def setup_environment() -> bool:
@@ -25,26 +35,30 @@ def setup_environment() -> bool:
     try:
         configure_directories()
         configure_logging_system()
-        log_info(f"{get_function_name(frame)} successful.")
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
         print(e)
-        log_info(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"{get_function_name(frame)} unsuccessful.")
         return False
 
 
 def main():
     """Main function to execute the daily messaging script."""
-    log_info("Script started.")
+    log_debug("Script started.")
     if setup_environment():
         if prepare_data():
-            recipients = get_todays_recipients()
-            if save_recipients(recipients):
-                if dispatch_communications(recipients):
-                    log_info("Script completed successfully.")
-                    return
-    log_info("Script completed unsuccessfully.")
+            global RECIPIENTS
+            RECIPIENTS = get_todays_recipients()
+            if save_recipients(RECIPIENTS):
+                if len(RECIPIENTS) > 0:
+                    if dispatch_messages_to_recipients(RECIPIENTS):
+                        log_debug("Script completed successfully.")
+                        return
+    log_error("Script completed unsuccessfully.")
 
 
 if __name__ == "__main__":
     main()
+    dispatch_message_to_admins(RECIPIENTS)
+    perform_cleanup()

@@ -9,22 +9,30 @@ PATH_SESSION_INFO_LOG = ""
 
 def get_new_filename(filename, is_dev):
     res = increment_filename(filename)
-    path = PATH_DEV_LOG_DIR if is_dev else PATH_ADMIN_LOG_DIR
-    file_extension = DEV_LOG_FILE_EXTENSION if is_dev else ADMIN_LOG_FILE_EXTENSION
+    path = PATH_DEBUG_LOG_DIR if is_dev else PATH_INFO_LOG_DIR
+    file_extension = FILE_EXTENSION_DEBUG if is_dev else FILE_EXTENSION_INFO
     path_to_new_filename = os.path.join(path, res + file_extension)
     if os.path.exists(path_to_new_filename):
         return get_new_filename(res, is_dev)
     return res
 
 
-def get_logfile_path(is_dev):
-    path = PATH_DEV_LOG_DIR if is_dev else PATH_ADMIN_LOG_DIR
-    file_extension = DEV_LOG_FILE_EXTENSION if is_dev else ADMIN_LOG_FILE_EXTENSION
-    path_to_log_file = os.path.join(path, f"{TODAY_FOR_LOG}{file_extension}")
+def get_logfile_path(is_debug):
+    path = PATH_DEBUG_LOG_DIR if is_debug else PATH_INFO_LOG_DIR
+    file_extension = FILE_EXTENSION_DEBUG if is_debug else FILE_EXTENSION_INFO
+    path_to_log_file = (
+        os.path.join(path, f"debug-{TODAY_FOR_LOG}{file_extension}")
+        if is_debug
+        else os.path.join(path, f"info-{TODAY_FOR_LOG}{file_extension}")
+    )
     if os.path.exists(path_to_log_file):
         filename = str(os.path.basename(path_to_log_file))
-        new_filename = get_new_filename(filename, is_dev)
-        path_to_log_file = os.path.join(path, f"{new_filename}{file_extension}")
+        new_filename = get_new_filename(filename, is_debug)
+        path_to_log_file = (
+            os.path.join(path, f"debug-{new_filename}{file_extension}")
+            if is_debug
+            else os.path.join(path, f"info-{new_filename}{file_extension}")
+        )
     return path_to_log_file
 
 
@@ -52,6 +60,14 @@ def configure_logging_system():
     LOGGER.debug("Logger system configured successfully")
 
 
+def log_warning(warning):
+    LOGGER.warning(warning)
+
+
+def log_error(error):
+    LOGGER.error(error)
+
+
 def log_info(info):
     LOGGER.info(info)
 
@@ -60,8 +76,8 @@ def log_debug(info):
     LOGGER.debug(info)
 
 
-def get_path_to_current_session_log(is_dev=False):
-    if is_dev:
+def get_path_to_current_session_log(is_debug=False):
+    if is_debug:
         return PATH_SESSION_DEBUG_LOG
     else:
         return PATH_SESSION_INFO_LOG
