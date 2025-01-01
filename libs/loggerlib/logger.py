@@ -10,7 +10,7 @@ PATH_SESSION_INFO_LOG = ""
 def get_new_filename(filename, is_dev):
     res = increment_filename(filename)
     path = PATH_DEBUG_LOG_DIR if is_dev else PATH_INFO_LOG_DIR
-    file_extension = FILE_EXTENSION_DEBUG if is_dev else FILE_EXTENSION_INFO
+    file_extension = LOG_FILE_EXTENSION
     path_to_new_filename = os.path.join(path, res + file_extension)
     if os.path.exists(path_to_new_filename):
         return get_new_filename(res, is_dev)
@@ -19,7 +19,7 @@ def get_new_filename(filename, is_dev):
 
 def get_logfile_path(is_debug):
     path = PATH_DEBUG_LOG_DIR if is_debug else PATH_INFO_LOG_DIR
-    file_extension = FILE_EXTENSION_DEBUG if is_debug else FILE_EXTENSION_INFO
+    file_extension = LOG_FILE_EXTENSION
     path_to_log_file = (
         os.path.join(path, f"debug-{TODAY_FOR_LOG}{file_extension}")
         if is_debug

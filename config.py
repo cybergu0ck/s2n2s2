@@ -10,9 +10,7 @@ EMAIL_ENABLED = True
 DIR_NAME_LOGS = "logs"
 DIR_NAME_DEBUG_LOGS = "debug"
 DIR_NAME_INFO_LOGS = "info"
-# REVIEW - Decide only one file extension
-FILE_EXTENSION_DEBUG = ".txt"
-FILE_EXTENSION_INFO = ".doc"
+LOG_FILE_EXTENSION = ".txt"
 
 PATH_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 PATH_LOG_DIR = os.path.join(PATH_ROOT_DIR, DIR_NAME_LOGS)
