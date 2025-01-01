@@ -7,6 +7,38 @@ TIME_OUT = 3
 LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 
+def is_module_functioning() -> bool:
+    """Returns True if the simcom lte module is functioning, else False."""
+    time.sleep(2)
+    LTE_MODULE.write(b"AT\r")
+    at_command = LTE_MODULE.readline().decode().strip()
+    print(f"AT Command to check if module is functioning : {at_command}")
+    response = LTE_MODULE.readline().decode().strip()
+    if response == "OK":
+        print(f"Response : {response}")
+        return True
+    else:
+        print(f"Module is not functioning correctly, restart is suggested.")
+        print(f"Response : {response}")
+        return False
+
+
+def is_sim_inserted() -> bool:
+    """Returns True if sim card is inserted in the simcom lte module, else False."""
+    time.sleep(2)
+    LTE_MODULE.write(b"AT+CIMI\r")
+    at_command = LTE_MODULE.readline().decode().strip()
+    print(f"AT Command to check if sim is inserted : {at_command}")
+    response = LTE_MODULE.readline().decode().strip()
+    if response == "+CME ERROR: SIM not inserted":
+        print(f"Sim not inserted, ensure sim is properly inserted.")
+        print(f"Response : {response}")
+        return False
+    else:
+        print(f"Response : {response}")
+        return True
+
+
 def is_network_registered() -> bool:
     """Returns True if the simcom lte module is registred to a network, else False."""
     LTE_MODULE.write(b"AT+CREG?\r")
@@ -53,7 +85,10 @@ def is_network_registered() -> bool:
         return False
 
 
-print(is_network_registered())
+if is_module_functioning():
+    if is_sim_inserted():
+        if is_network_registered():
+            print("done")
 
 
 # def unicode_to_hex(text):
