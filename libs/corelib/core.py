@@ -145,7 +145,8 @@ def populate_admin_list() -> bool:
     admin_name_col = ADMIN_WORKSHEET.col_values(1)
     for row_id, cell_value in enumerate(admin_name_col[1:], start=2):
         row_values = ADMIN_WORKSHEET.row_values(row_id)
-        print(row_values)
+        if row_values == []:
+            continue
         admin_obj = Admin(
             row_values[0], row_values[1]
         )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
