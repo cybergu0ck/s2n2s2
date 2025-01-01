@@ -299,36 +299,32 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     if is_valid_phone_number(phone_number):
         if is_module_functioning():
             if is_sim_inserted():
-                if is_network_registered():
-                    if is_kannada:
-                        if set_character_set("UCS2"):
-                            if set_text_mode_parameters(True):
-                                message_in_hex = unicode_to_hex(sms_message)
-                                success = send_sms(phone_number, message_in_hex, True)
-                                if success:
-                                    log_debug(
-                                        f"SMS to <{phone_number}> successful using kannada."
-                                    )
-                                    return True
-                                else:
-                                    log_warning(
-                                        f"SMS to <{phone_number}> unsuccessful."
-                                    )
-                                    return False
-                    else:
-                        if set_character_set("IRA"):
-                            if set_text_mode_parameters(False):
-                                success = send_sms(phone_number, sms_message, False)
-                                if success:
-                                    log_debug(
-                                        f"SMS to <{phone_number}> successful using english."
-                                    )
-                                    return True
-                                else:
-                                    log_warning(
-                                        f"SMS to <{phone_number}> unsuccessful."
-                                    )
-                                    return False
+                # if is_network_registered():
+                if is_kannada:
+                    if set_character_set("UCS2"):
+                        if set_text_mode_parameters(True):
+                            message_in_hex = unicode_to_hex(sms_message)
+                            success = send_sms(phone_number, message_in_hex, True)
+                            if success:
+                                log_debug(
+                                    f"SMS to <{phone_number}> successful using kannada."
+                                )
+                                return True
+                            else:
+                                log_warning(f"SMS to <{phone_number}> unsuccessful.")
+                                return False
+                else:
+                    if set_character_set("IRA"):
+                        if set_text_mode_parameters(False):
+                            success = send_sms(phone_number, sms_message, False)
+                            if success:
+                                log_debug(
+                                    f"SMS to <{phone_number}> successful using english."
+                                )
+                                return True
+                            else:
+                                log_warning(f"SMS to <{phone_number}> unsuccessful.")
+                                return False
     log_warning(f"SMS to <{phone_number}> unsuccessful.")
     return False
 
