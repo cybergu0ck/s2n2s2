@@ -29,9 +29,9 @@ def get_logfile_path(is_debug):
         filename = str(os.path.basename(path_to_log_file))
         new_filename = get_new_filename(filename, is_debug)
         path_to_log_file = (
-            os.path.join(path, f"debug-{new_filename}{file_extension}")
+            os.path.join(path, f"{new_filename}{file_extension}")
             if is_debug
-            else os.path.join(path, f"info-{new_filename}{file_extension}")
+            else os.path.join(path, f"{new_filename}{file_extension}")
         )
     return path_to_log_file
 
