@@ -28,14 +28,14 @@ def create_log_directories():
     """
     Create directories to store the generated log files if not created already.
     """
-    if not os.path.exists(DIR_NAME_LOGS):
-        os.makedirs(DIR_NAME_LOGS)
+    if not os.path.exists(PATH_LOG_DIR):
+        os.makedirs(PATH_LOG_DIR)
 
     if not os.path.exists(PATH_DEBUG_LOG_DIR):
-        os.makedirs(f"{DIR_NAME_LOGS}/{DIR_NAME_DEBUG_LOGS}")
+        os.makedirs(PATH_DEBUG_LOG_DIR)
 
     if not os.path.exists(PATH_INFO_LOG_DIR):
-        os.makedirs(f"{DIR_NAME_LOGS}/{DIR_NAME_INFO_LOGS}")
+        os.makedirs(PATH_INFO_LOG_DIR)
 
 
 def create_temp_directory():
@@ -44,7 +44,7 @@ def create_temp_directory():
     """
     if os.path.exists(PATH_TEMP_DIR):
         shutil.rmtree(PATH_TEMP_DIR)
-    os.makedirs(DIR_NAME_TEMP)
+    os.makedirs(PATH_TEMP_DIR)
 
 
 def configure_directories():
