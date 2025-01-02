@@ -88,14 +88,18 @@ def is_sim_inserted() -> bool:
     LTE_MODULE.write(b"AT+CIMI\r")
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check if sim is inserted : {at_command}")
-    response = LTE_MODULE.readline().decode().strip()
-    if response == "+CME ERROR: SIM not inserted":
-        log_warning(f"Sim not inserted, ensure sim is properly inserted.")
-        log_warning(f"Response : {response}")
-        return False
-    else:
-        log_debug(f"Response : {response}")
+    response_1 = LTE_MODULE.readline().decode().strip()
+    response_2 = LTE_MODULE.readline().decode().strip()
+    response_3 = LTE_MODULE.readline().decode().strip()
+    if response_3 == "OK":
+        log_debug(f"Response : {response_1}")
+        log_debug(f"Response : {response_2}")
+        log_debug(f"Response : {response_3}")
         return True
+    else:
+        log_warning(f"Sim not inserted, ensure sim is properly inserted.")
+        log_warning(f"Response : {response_1}")
+        return False
 
 
 def is_network_registered() -> bool:
@@ -104,43 +108,44 @@ def is_network_registered() -> bool:
     LTE_MODULE.write(b"AT+CREG?\r")
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check network registration status: {at_command}")
-    response = LTE_MODULE.readline().decode().strip()
-    # Successful output will be like  "+CREG: 0,1"
-    if response.startswith("+CREG:"):
-        status = response.split(",")[1]
+    response_1 = LTE_MODULE.readline().decode().strip()
+    response_2 = LTE_MODULE.readline().decode().strip()
+    response_3 = LTE_MODULE.readline().decode().strip()
+    if response_1.startswith("+CREG:") and response_3 == "OK":
+        status = response_1.split(",")[1]
         if status == "0":
             log_warning(
                 f" Not registered,ME is not currently searching a new operator to register to."
             )
-            log_warning(f"Response : {response}")
+            log_warning(f"Response : {response_1}")
             return False
         elif status == "1":
             log_debug(f"Registered to home network.")
-            log_debug(f"Response : {response}")
+            log_debug(f"Response : {response_1}")
             return True
         elif status == "2":
             log_warning(f"Registered to home network.")
-            log_warning(f"Response : {response}")
+            log_warning(f"Response : {response_1}")
             return False
         elif status == "3":
             log_warning(f"Registration denied.")
-            log_warning(f"Response : {response}")
+            log_warning(f"Response : {response_1}")
             return False
         elif status == "4":
             log_warning(f"Unknown response while fetching network registration.")
-            log_warning(f"Response : {response}")
+            log_warning(f"Response : {response_1}")
             return False
         elif status == "5":
             log_warning(f"Registered, roaming.")
-            log_warning(f"Response : {response}")
+            log_warning(f"Response : {response_1}")
             return True
         elif status == "6":
             log_warning(f"Registered, sms only.")
-            log_warning(f"Response : {response}")
+            log_warning(f"Response : {response_1}")
             return True
     else:
         log_warning(f"Unable to fetch network registation detail.")
-        log_warning(f"Response : {response}")
+        log_warning(f"Response : {response_1}")
         return False
 
 
@@ -256,34 +261,31 @@ def set_text_mode_parameters(is_non_english=False):
             return False
 
 
-def send_sms(recipient_phone_number, sms_message, is_hex=False) -> bool:
-    if not is_hex:
+def send_sms(phone_number, sms_message, is_hex=False) -> bool:
+    phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
+    sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
+
+    time.sleep(2)
+    LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
+    at_command = LTE_MODULE.readline().decode().strip()
+    log_debug(f"AT Command to send message : {at_command}")
+    response = LTE_MODULE.readline().decode().strip()
+    if response == ">":
         time.sleep(2)
-        LTE_MODULE.write(f'AT+CMGS="{recipient_phone_number}"\r'.encode())
+        LTE_MODULE.write(
+            f"{sms_message}\x1A".encode()
+        )  # \x1A is the ASCII code for Ctrl+Z
         at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to send message : {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == ">":
-            LTE_MODULE.write(
-                f"{sms_message}\x1A".encode()
-            )  # \x1A is the ASCII code for Ctrl+Z
-            time.sleep(2)
-            at_command = LTE_MODULE.readline().decode().strip()
-            log_debug(f"AT Command with message : {at_command}")
-            response = LTE_MODULE.readline().decode().strip()
-            if response.startswith("+CMGS:"):
-                response = LTE_MODULE.readline().decode().strip()
-                response = LTE_MODULE.readline().decode().strip()
-                if response == "OK":
-                    log_debug(f"Response : {response}")
-                else:
-                    log_warning(f"Message not sent.")
-                    log_warning(f"Response : {response}")
-                    return False
-            else:
-                log_warning(f"Message not sent.")
-                log_warning(f"Response : {response}")
-                return False
+        log_debug(f"AT Command with message : {at_command}")
+        response_1 = LTE_MODULE.readline().decode().strip()
+        response_2 = LTE_MODULE.readline().decode().strip()
+        response_3 = LTE_MODULE.readline().decode().strip()
+        if response_1.startswith("+CMGS:") and response_3 == "OK":
+            log_debug(f"Response : {response}")
+        else:
+            log_warning(f"Message not sent.")
+            log_warning(f"Response : {response_1}")
+            return False
     else:
         log_warning(f"Message not sent.")
         log_warning(f"Response : {response}")
@@ -299,32 +301,35 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     if is_valid_phone_number(phone_number):
         if is_module_functioning():
             if is_sim_inserted():
-                # if is_network_registered():
-                if is_kannada:
-                    if set_character_set("UCS2"):
-                        if set_text_mode_parameters(True):
-                            message_in_hex = unicode_to_hex(sms_message)
-                            success = send_sms(phone_number, message_in_hex, True)
-                            if success:
-                                log_debug(
-                                    f"SMS to <{phone_number}> successful using kannada."
-                                )
-                                return True
-                            else:
-                                log_warning(f"SMS to <{phone_number}> unsuccessful.")
-                                return False
-                else:
-                    if set_character_set("IRA"):
-                        if set_text_mode_parameters(False):
-                            success = send_sms(phone_number, sms_message, False)
-                            if success:
-                                log_debug(
-                                    f"SMS to <{phone_number}> successful using english."
-                                )
-                                return True
-                            else:
-                                log_warning(f"SMS to <{phone_number}> unsuccessful.")
-                                return False
+                if is_network_registered():
+                    if is_kannada:
+                        if set_character_set("UCS2"):
+                            if set_text_mode_parameters(True):
+                                success = send_sms(phone_number, sms_message, True)
+                                if success:
+                                    log_debug(
+                                        f"SMS to <{phone_number}> successful using kannada."
+                                    )
+                                    return True
+                                else:
+                                    log_warning(
+                                        f"SMS to <{phone_number}> unsuccessful."
+                                    )
+                                    return False
+                    else:
+                        if set_character_set("IRA"):
+                            if set_text_mode_parameters(False):
+                                success = send_sms(phone_number, sms_message, False)
+                                if success:
+                                    log_debug(
+                                        f"SMS to <{phone_number}> successful using english."
+                                    )
+                                    return True
+                                else:
+                                    log_warning(
+                                        f"SMS to <{phone_number}> unsuccessful."
+                                    )
+                                    return False
     log_warning(f"SMS to <{phone_number}> unsuccessful.")
     return False
 
