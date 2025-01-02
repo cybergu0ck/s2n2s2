@@ -284,6 +284,7 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
             log_debug(f"Response : {response_1}")
             log_debug(f"Response : {response_2}")
             log_debug(f"Response : {response_3}")
+            return True
         else:
             log_warning(f"Message not sent.")
             log_warning(f"Response : {response_1}")
