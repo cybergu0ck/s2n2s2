@@ -431,7 +431,7 @@ def dispatch_messages_to_recipients(recipients) -> bool:
                 else:
                     log_warning(f"Dispatching Email to {title} {name} unsuccessful.")
                     # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
-            time.sleep(2)
+            time.sleep(10)
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
