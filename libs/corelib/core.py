@@ -302,11 +302,17 @@ def get_email_body_for_recipient(title, name):
 
 
 def get_email_attachement_for_recipient():
+    frame = inspect.currentframe()
+
     res = []
-    standard_image = {}
-    standard_image["path"] = os.path.join(PATH_IMAGE_ASSETS_DIR, "standard.jpeg")
-    standard_image["name"] = "NalurShankaraNarayana.jpeg"
-    res.append(standard_image)
+    try:
+        standard_image = {}
+        standard_image["path"] = os.path.join(PATH_IMAGE_ASSETS_DIR, "standard.jpeg")
+        standard_image["name"] = "NalurShankaraNarayana.jpeg"
+        res.append(standard_image)
+    except Exception as e:
+        log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
     return res
 
 
@@ -347,22 +353,26 @@ def get_email_body_for_admin(name, recipients):
 
 
 def get_email_attachement_for_admin():
+    frame = inspect.currentframe()
     res = []
-    path_to_img = os.path.join(PATH_TEMP_DIR, IMAGE_NAME)
-    if os.path.exists(path_to_img):
-        recipients_image = {}
-        recipients_image["path"] = path_to_img
-        recipients_image["name"] = IMAGE_NAME
-        res.append(recipients_image)
-    log_info_file = {}
-    log_info_file["path"] = get_path_to_current_session_log(False)
-    log_info_file["name"] = get_path_to_current_session_log(False).split(os.sep)[-1]
-    res.append(log_info_file)
-    log_debug_file = {}
-    log_debug_file["path"] = get_path_to_current_session_log(True)
-    log_debug_file["name"] = get_path_to_current_session_log(True).split(os.sep)[-1]
-    res.append(log_debug_file)
-
+    try:
+        path_to_img = os.path.join(PATH_TEMP_DIR, IMAGE_NAME)
+        if os.path.exists(path_to_img):
+            recipients_image = {}
+            recipients_image["path"] = path_to_img
+            recipients_image["name"] = IMAGE_NAME
+            res.append(recipients_image)
+        log_info_file = {}
+        log_info_file["path"] = get_path_to_current_session_log(False)
+        log_info_file["name"] = get_path_to_current_session_log(False).split(os.sep)[-1]
+        res.append(log_info_file)
+        log_debug_file = {}
+        log_debug_file["path"] = get_path_to_current_session_log(True)
+        log_debug_file["name"] = get_path_to_current_session_log(True).split(os.sep)[-1]
+        res.append(log_debug_file)
+    except Exception as e:
+        log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
     return res
 
 
