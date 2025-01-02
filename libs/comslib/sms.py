@@ -271,17 +271,19 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
     log_debug(f"AT Command to send message : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
     if response == ">":
-        time.sleep(2)
         LTE_MODULE.write(
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
+        time.sleep(2)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command with message : {at_command}")
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
         response_3 = LTE_MODULE.readline().decode().strip()
         if response_1.startswith("+CMGS:") and response_3 == "OK":
-            log_debug(f"Response : {response}")
+            log_debug(f"Response : {response_1}")
+            log_debug(f"Response : {response_2}")
+            log_debug(f"Response : {response_3}")
         else:
             log_warning(f"Message not sent.")
             log_warning(f"Response : {response_1}")
