@@ -5,7 +5,10 @@ import time
 PORT = "/dev/ttyS0"
 BAUD_RATE = 115200
 TIME_OUT = 1
-LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
+
+if PI_MODE and SMS_ENABLED:
+    global LTE_MODULE
+    LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 
 def flush_input():

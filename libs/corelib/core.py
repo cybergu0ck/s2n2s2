@@ -479,7 +479,8 @@ def dispatch_message_to_admins(recipients) -> bool:
 
 def perform_cleanup():
     frame = inspect.currentframe()
-    close_serial()
+    if PI_MODE and SMS_ENABLED:
+        close_serial()
     log_debug(f"{get_function_name(frame)} successful.")
 
 
