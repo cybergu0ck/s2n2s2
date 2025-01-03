@@ -29,15 +29,12 @@ def send_sms():
                 print(f"Response : {response_1}")
                 print(f"Response : {response_2}")
                 print(f"Response : {response_3}")
-                return True
             else:
                 print(f"Message not sent.")
                 print(f"Response : {response_1}")
-                return False
         else:
             print(f"Message not sent.")
             print(f"Response : {response}")
-            return False
 
 
 send_sms()
