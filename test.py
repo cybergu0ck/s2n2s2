@@ -9,12 +9,11 @@ LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 def is_module_functioning() -> bool:
     """Returns True if the simcom lte module is functioning, else False."""
-    time.sleep(2)
     LTE_MODULE.write(b"AT\r")
+    time.sleep(20)
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to check if module is functioning : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
-    time.sleep(2)
     if response == "OK":
         print(f"Response : {response}")
         return True
@@ -90,10 +89,7 @@ def is_network_registered() -> bool:
         return False
 
 
-if is_module_functioning():
-    if is_sim_inserted():
-        if is_network_registered():
-            print("done")
+is_module_functioning()
 
 
 # def unicode_to_hex(text):
