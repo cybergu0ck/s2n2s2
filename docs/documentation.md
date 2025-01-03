@@ -1,8 +1,10 @@
-# Setup gspread
+# Setting up gspread
+
+Follow [official documentation](https://docs.gspread.org/en/latest/oauth2.html#service-account) for setting up gspread apis.
 
 <br>
 
-## Enable API Access for a Project
+## Enable api access for a project
 
 1. Head to [Google Developers Console](https://console.cloud.google.com/apis/dashboard) and create a new project (or select the one you already have).
 1. In the box labeled “Search for APIs and Services”, search for “Google Drive API” and enable it.
@@ -11,7 +13,7 @@
 <br>
 <br>
 
-## Using a Serive Account (Basically a Bot)
+## Using a serive account (basically a bot)
 
 1. Enable to API access if not done already.
 1. Go to “APIs & Services > Credentials” and choose “Create credentials > Service account key”.
@@ -41,16 +43,13 @@
 
 <br>
 <br>
-
-## Resources
-
-- Follow [official documentation](https://docs.gspread.org/en/latest/oauth2.html#service-account) for setting up gspread apis.
-
-<br>
-<br>
 <br>
 
-# Setup Serial Port on Raspberry Pi
+# Setting up serial port on raspberry pi
+
+To get a basic understanding, watch [this video](https://www.youtube.com/watch?v=oevxqPk78sM) and [Saravanan's video](https://www.youtube.com/watch?v=LMQJAOjxFaw).
+
+Follow the following steps:
 
 1. Launch the raspberry pi configuration tool using `sudo raspi-config`
 1. Select "Interface Options" and then select "Serial Port"
@@ -81,11 +80,68 @@
    ls -l /dev/serial0
    ```
 
-## Resources
+<br>
+<br>
+<br>
 
-- Follow [this video](https://www.youtube.com/watch?v=oevxqPk78sM) to get a basic understanding
-- [Saravanan's Video](https://www.youtube.com/watch?v=LMQJAOjxFaw)
+# Setting up a cron job
+
+Follow these steps :
+
+1. Use `crontab -e` to open the crontab file.
+1. The following syntax is used to enter a cron task:
+
+   ```
+   * * * * * /path/to/command
+   ```
+
+   - Where the five asterisks represent:
+
+     - Minute (0-59)
+     - Hour (0-23)
+     - Day of Month (1-31)
+     - Month (1-12)
+     - Day of Week (0-7, where both 0 and 7 represent Sunday)
+
+   - To run a script every day at 10:15 PM:
+
+     ```
+         15 22 * * * /home/user/script.sh
+     ```
+
+   - To run a script every 5 minutes:
+
+     ```
+     */5 * * * * /path/to/command
+     ```
+
+1. Additionaly ensure the following:
+
+   - Ensure your script has executable permissions using :
+
+     ```
+     chmod +x /path/to/your/script.sh
+     ```
+
+   - If the script uses any environment variables, it should be included in the crontab file in the following syntax :
+
+     ```
+     #syntax
+     ENV_VARIABLE=value
+
+     #example
+     EMAIL=mymail.com
+     ```
 
 <br>
 <br>
 <br>
+
+# Using minicom
+
+- Ensure minicom is installed using the relevant linux package manager.
+- Run the following :
+  ```
+  sudo minicom -s
+  ```
+- I get an interface to change some settings where I set the correct port setting to `ttyS0` in this case and the minicom is got upon escaping after the settings interface.
