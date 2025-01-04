@@ -113,12 +113,11 @@ def send_sms():
         LTE_MODULE.write(
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
-        time.sleep(2)
+        time.sleep(10)
         at_command_line1 = LTE_MODULE.readline().decode().strip()
         at_command_line2 = LTE_MODULE.readline().decode().strip()
         at_command_line3 = LTE_MODULE.readline().decode().strip()
         at_command_line4 = LTE_MODULE.readline().decode().strip()
-        time.sleep(2)
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
         response_3 = LTE_MODULE.readline().decode().strip()
