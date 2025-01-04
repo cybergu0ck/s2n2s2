@@ -114,7 +114,10 @@ def send_sms() -> bool:
         LTE_MODULE.write(
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
-        # time.sleep(2) #write function is anyway a blocking function, better to quickly read the buffer
+        time.sleep(
+            10
+        )  # write function is anyway a blocking function, better to quickly read the buffer
+        print(LTE_MODULE.in_waiting)
         at_command = LTE_MODULE.readline().decode().strip()
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
