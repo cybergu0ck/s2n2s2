@@ -102,7 +102,7 @@ def set_text_mode_parameters(is_non_english=False):
 
 def send_sms():
     phone_num = "+919632448895"
-    sms_message = "Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today...Regards Temple Trustee, Naloor, Kadaba"
+    sms_message = f"Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today.\n\nRegards Temple Trustee, Naloor, Kadaba"
     LTE_MODULE.write(f'AT+CMGS="{phone_num}"\r'.encode())
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to send message : {at_command}")
