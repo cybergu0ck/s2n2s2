@@ -116,8 +116,13 @@ def send_sms():
         time.sleep(5)
         print(LTE_MODULE.in_waiting)
         time.sleep(5)
-        at_command = LTE_MODULE.readline().decode().strip()
-        print(f"AT Command with message : {at_command}")
+        at_command_line1 = LTE_MODULE.readline().decode().strip()
+        at_command_line2 = LTE_MODULE.readline().decode().strip()
+        at_command_line3 = LTE_MODULE.readline().decode().strip()
+        at_command_line4 = LTE_MODULE.readline().decode().strip()
+        print(
+            f"AT Command with message : {at_command_line1 + at_command_line2 + at_command_line3 + at_command_line4  }"
+        )
 
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
