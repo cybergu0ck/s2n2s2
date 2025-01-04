@@ -118,7 +118,7 @@ def send_sms():
         at_command_line2 = LTE_MODULE.readline().decode().strip()
         at_command_line3 = LTE_MODULE.readline().decode().strip()
         at_command_line4 = LTE_MODULE.readline().decode().strip()
-        # flush_input()
+        flush_input()
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
         response_3 = LTE_MODULE.readline().decode().strip()
