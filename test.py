@@ -103,8 +103,8 @@ def set_text_mode_parameters(is_non_english=False):
 def send_sms():
     flush_output()
     phone_num = "+919632448895"
-    sms_message = f"Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today.\n\nRegards,\nTemple Trustee, Naloor, Kadaba"
-    # sms_message = "A"
+    # sms_message = f"Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today.\n\nRegards,\nTemple Trustee, Naloor, Kadaba"
+    sms_message = "Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today...Regards Temple Trustee, Naloor, Kadaba"
     LTE_MODULE.write(f'AT+CMGS="{phone_num}"\r'.encode())
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to send message : {at_command}")
@@ -113,21 +113,37 @@ def send_sms():
         LTE_MODULE.write(
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
-        time.sleep(10)
-        at_command_line1 = LTE_MODULE.readline().decode().strip()
-        at_command_line2 = LTE_MODULE.readline().decode().strip()
-        at_command_line3 = LTE_MODULE.readline().decode().strip()
-        at_command_line4 = LTE_MODULE.readline().decode().strip()
+        time.sleep(2)
+        at_command = LTE_MODULE.readline().decode().strip()
+        print(f"AT Command with message : {at_command}")
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
         response_3 = LTE_MODULE.readline().decode().strip()
-        print(f"at_command_line1:{at_command_line1}")
-        print(f"at_command_line2:{at_command_line2}")
-        print(f"at_command_line3:{at_command_line3}")
-        print(f"at_command_line4:{at_command_line4}")
-        print(f"response_1:{response_1}")
-        print(f"response_2:{response_2}")
-        print(f"response_3:{response_3}")
+        if response_1.startswith("+CMGS:") and response_3 == "OK":
+            print(f"Response : {response_1}")
+            print(f"Response : {response_2}")
+            print(f"Response : {response_3}")
+            res = True
+        else:
+            print(f"Message not sent.")
+            print(f"Response : {response_1}")
+            res = False
+
+        # time.sleep(10)
+        # at_command_line1 = LTE_MODULE.readline().decode().strip()
+        # at_command_line2 = LTE_MODULE.readline().decode().strip()
+        # at_command_line3 = LTE_MODULE.readline().decode().strip()
+        # at_command_line4 = LTE_MODULE.readline().decode().strip()
+        # response_1 = LTE_MODULE.readline().decode().strip()
+        # response_2 = LTE_MODULE.readline().decode().strip()
+        # response_3 = LTE_MODULE.readline().decode().strip()
+        # print(f"at_command_line1:{at_command_line1}")
+        # print(f"at_command_line2:{at_command_line2}")
+        # print(f"at_command_line3:{at_command_line3}")
+        # print(f"at_command_line4:{at_command_line4}")
+        # print(f"response_1:{response_1}")
+        # print(f"response_2:{response_2}")
+        # print(f"response_3:{response_3}")
         # # print(
         # #     f"AT Command with message : {at_command_line1 + at_command_line2 + at_command_line3 + at_command_line4  }"
         # # )
