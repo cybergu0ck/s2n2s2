@@ -7,6 +7,99 @@ TIME_OUT = 3
 LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 
+def flush_input():
+    LTE_MODULE.reset_input_buffer()
+
+
+def flush_output():
+    LTE_MODULE.reset_output_buffer()
+
+
+def set_character_set(character_set: str) -> bool:
+    res = False
+    flush_output()
+    if character_set == "UCS2":
+        LTE_MODULE.write(b'AT+CSCS="UCS2"\r')
+        time.sleep(2)
+        at_command = LTE_MODULE.readline().decode().strip()
+        print(f"AT Command to set character set: {at_command}")
+        response = LTE_MODULE.readline().decode().strip()
+        if response == "OK":
+            print(f"Response : {response}")
+            res = True
+        else:
+            print("Character set not set.")
+            print(f"Response : {response}")
+            res = False
+    elif character_set == "IRA":
+        LTE_MODULE.write(b'AT+CSCS="IRA"\r')
+        time.sleep(2)
+        at_command = LTE_MODULE.readline().decode().strip()
+        print(f"AT Command to set character set: {at_command}")
+        response = LTE_MODULE.readline().decode().strip()
+        if response == "OK":
+            print(f"Response : {response}")
+            res = True
+        else:
+            print("Character set not set.")
+            print(f"Response : {response}")
+            res = False
+    elif character_set == "GSM":
+        LTE_MODULE.write(b'AT+CSCS="GSM"\r')
+        time.sleep(2)
+        at_command = LTE_MODULE.readline().decode().strip()
+        print(f"AT Command to set character set: {at_command}")
+        response = LTE_MODULE.readline().decode().strip()
+        if response == "OK":
+            print(f"Response : {response}")
+            res = True
+        else:
+            print("Character set not set.")
+            print(f"Response : {response}")
+            res = False
+    else:
+        print(
+            "Unsupported character set. Supported character set are IRA, GSM and UCS2."
+        )
+        res = False
+    flush_input()
+    return res
+
+
+def set_text_mode_parameters(is_non_english=False):
+    """Set text mode parameters."""
+    res = False
+    flush_output()
+    if is_non_english:
+        LTE_MODULE.write(b"AT+CSMP=17,168,0,8\r")
+        time.sleep(2)
+        at_command = LTE_MODULE.readline().decode().strip()
+        print(f"AT Command to set text mode parameters: {at_command}")
+        response = LTE_MODULE.readline().decode().strip()
+        if response == "OK":
+            print(f"Response : {response}")
+            res = True
+        else:
+            print("Text mode parameters not set.")
+            print(f"Response : {response}")
+            res = False
+    else:
+        LTE_MODULE.write(b"AT+CSMP=17,168,0,0\r")
+        time.sleep(2)
+        at_command = LTE_MODULE.readline().decode().strip()
+        print(f"AT Command to set text mode parameters: {at_command}")
+        response = LTE_MODULE.readline().decode().strip()
+        if response == "OK":
+            print(f"Response : {response}")
+            res = True
+        else:
+            print("Text mode parameters not set.")
+            print(f"Response : {response}")
+            res = False
+    flush_input()
+    return res
+
+
 def send_sms():
     phone_num = "+919632448895"
     sms_message = "Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today...Regards Temple Trustee, Naloor, Kadaba"
@@ -36,4 +129,6 @@ def send_sms():
         print(f"Response : {response}")
 
 
+set_character_set("IRA")
+set_text_mode_parameters(False)
 send_sms()
