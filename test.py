@@ -113,33 +113,32 @@ def send_sms():
         LTE_MODULE.write(
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
-        print(LTE_MODULE.in_waiting)
 
         at_command_line1 = LTE_MODULE.readline().decode().strip()
-        print(LTE_MODULE.in_waiting)
         at_command_line2 = LTE_MODULE.readline().decode().strip()
-        print(LTE_MODULE.in_waiting)
         at_command_line3 = LTE_MODULE.readline().decode().strip()
-        print(LTE_MODULE.in_waiting)
         at_command_line4 = LTE_MODULE.readline().decode().strip()
-        flush_input()
-        print(LTE_MODULE.in_waiting)
+        # flush_input()
         response_1 = LTE_MODULE.readline().decode().strip()
-        print(LTE_MODULE.in_waiting)
         response_2 = LTE_MODULE.readline().decode().strip()
-        print(LTE_MODULE.in_waiting)
         response_3 = LTE_MODULE.readline().decode().strip()
-        print(LTE_MODULE.in_waiting)
-        print(
-            f"AT Command with message : {at_command_line1 + at_command_line2 + at_command_line3 + at_command_line4  }"
-        )
-        if response_1.startswith("+CMGS:") and response_3 == "OK":
-            print(f"Response : {response_1}")
-            print(f"Response : {response_2}")
-            print(f"Response : {response_3}")
-        else:
-            print(f"Message not sent.")
-            print(f"Response : {response_1}")
+        print(f"at_command_line1:{at_command_line1}")
+        print(f"at_command_line2:{at_command_line2}")
+        print(f"at_command_line3:{at_command_line3}")
+        print(f"at_command_line4:{at_command_line4}")
+        print(f"response_1:{response_1}")
+        print(f"response_2:{response_2}")
+        print(f"response_3:{response_3}")
+        # # print(
+        # #     f"AT Command with message : {at_command_line1 + at_command_line2 + at_command_line3 + at_command_line4  }"
+        # # )
+        # if response_1.startswith("+CMGS:") and response_3 == "OK":
+        #     print(f"Response : {response_1}")
+        #     print(f"Response : {response_2}")
+        #     print(f"Response : {response_3}")
+        # else:
+        #     print(f"Message not sent.")
+        #     print(f"Response : {response_1}")
     else:
         print(f"Message not sent.")
         print(f"Response : {response}")
