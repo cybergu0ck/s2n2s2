@@ -128,7 +128,10 @@ def send_sms():
             print(f"Message not sent.")
             print(f"Response : {response_1}")
             res = False
-
+        print(f"at_command:{at_command}")
+        print(f"response_1:{response_1}")
+        print(f"response_2:{response_2}")
+        print(f"response_3:{response_3}")
         # time.sleep(10)
         # at_command_line1 = LTE_MODULE.readline().decode().strip()
         # at_command_line2 = LTE_MODULE.readline().decode().strip()
