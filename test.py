@@ -114,14 +114,17 @@ def send_sms():
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
         print(LTE_MODULE.in_waiting)
-        at_command_line1 = LTE_MODULE.readline().decode().strip()
-        at_command_line2 = LTE_MODULE.readline().decode().strip()
-        at_command_line3 = LTE_MODULE.readline().decode().strip()
-        at_command_line4 = LTE_MODULE.readline().decode().strip()
+        if LTE_MODULE.in_waiting > 0:
+            at_command_line1 = LTE_MODULE.readline().decode().strip()
+            at_command_line2 = LTE_MODULE.readline().decode().strip()
+            at_command_line3 = LTE_MODULE.readline().decode().strip()
+            at_command_line4 = LTE_MODULE.readline().decode().strip()
+            flush_input()
         print(
             f"AT Command with message : {at_command_line1 + at_command_line2 + at_command_line3 + at_command_line4  }"
         )
 
+        print(LTE_MODULE.in_waiting)
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
         response_3 = LTE_MODULE.readline().decode().strip()
