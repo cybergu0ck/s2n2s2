@@ -103,7 +103,7 @@ def set_text_mode_parameters(is_non_english=False):
 def send_sms():
     flush_output()
     phone_num = "+919632448895"
-    sms_message = f"Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today.\n\nRegards,\n Temple Trustee, Naloor, Kadaba"
+    sms_message = f"Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today.\n\nRegards,\nTemple Trustee, Naloor, Kadaba"
     LTE_MODULE.write(f'AT+CMGS="{phone_num}"\r'.encode())
     at_command = LTE_MODULE.readline().decode().strip()
     print(f"AT Command to send message : {at_command}")
@@ -112,9 +112,9 @@ def send_sms():
         LTE_MODULE.write(
             f"{sms_message}\x1A".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
-        # time.sleep(2)
+        time.sleep(5)
         print(LTE_MODULE.in_waiting)
-        time.sleep(10)
+        time.sleep(5)
         at_command = LTE_MODULE.readline().decode().strip()
         print(f"AT Command with message : {at_command}")
 
