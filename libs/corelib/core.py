@@ -294,7 +294,7 @@ def get_simple_kannada_message():
 
 
 def get_simple_english_message():
-    return "Dear devotee of Lord Nalur Shankara Narayana, your Shashwatha Pooja Seva is performed today."
+    return "Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today...Regards Temple Trustee, Naloor, Kadaba"
 
 
 def get_email_body_for_recipient(title, name):
