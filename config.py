@@ -4,8 +4,9 @@ import shutil
 
 DEV_MODE = True
 PI_MODE = True
-SMS_ENABLED = True
-EMAIL_ENABLED = True
+ENABLE_SMS = True
+ENABLE_EMAIL = True
+ENABLE_LANGUAGE = False
 
 DIR_NAME_LOGS = "logs"
 DIR_NAME_DEBUG_LOGS = "debug"

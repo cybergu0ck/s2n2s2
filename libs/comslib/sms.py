@@ -6,7 +6,7 @@ PORT = "/dev/ttyS0"
 BAUD_RATE = 115200
 TIME_OUT = 1
 
-if PI_MODE and SMS_ENABLED:
+if PI_MODE and ENABLE_SMS:
     global LTE_MODULE
     LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 

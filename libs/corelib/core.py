@@ -415,9 +415,11 @@ def dispatch_messages_to_recipients(recipients) -> bool:
             log_debug(
                 f"Recipient, Name: {title} {name}, Phone : {phone_num}, Email : {email_address}, Gotra : {gotra}, Rashi : {rashi}, Nakshatra : {nakshatra}."
             )
-            if PI_MODE and SMS_ENABLED:
+            if PI_MODE and ENABLE_SMS:
                 log_debug(f"Dispatching SMS to {title} {name}.")
-                is_kannada = True if language == "Kannada" else False
+                is_kannada = (
+                    True if language == "Kannada" and ENABLE_LANGUAGE else False
+                )
                 simple_message = (
                     get_simple_kannada_message()
                     if is_kannada
@@ -430,7 +432,7 @@ def dispatch_messages_to_recipients(recipients) -> bool:
                     log_warning(f"Dispatching SMS to {title} {name} unsuccessful.")
                     # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
 
-            if EMAIL_ENABLED:
+            if ENABLE_EMAIL:
                 log_debug(f"Dispatching Email to {title} {name}.")
                 subject = "Confirmation : Shashwatha Pooja Seva"
                 body = get_email_body_for_recipient(title, name)
@@ -462,7 +464,7 @@ def dispatch_message_to_admins(recipients) -> bool:
             log_debug(
                 f"Admin, Name: {admin.name}, Phone : {admin.phone_number}, Email : {admin.email}."
             )
-            if EMAIL_ENABLED:
+            if ENABLE_EMAIL:
                 subject = "Daily Notification"
                 attachments = get_email_attachement_for_admin()
                 body = get_email_body_for_admin(admin.name, recipients)
@@ -479,7 +481,7 @@ def dispatch_message_to_admins(recipients) -> bool:
 
 def perform_cleanup():
     frame = inspect.currentframe()
-    if PI_MODE and SMS_ENABLED:
+    if PI_MODE and ENABLE_SMS:
         close_serial()
     log_debug(f"{get_function_name(frame)} successful.")
 
