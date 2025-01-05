@@ -51,6 +51,7 @@ class SheetsHeader(Enum):
     REGISTERED_WHATSAPP_NUMBER = auto()
     REGISTERED_EMAIL = auto()
     REGISTERED_LANGUAGE = auto()
+    REGISTERED_BOOK_NUMBER = auto()
 
 
 sheetsheader_to_internalreference = {
@@ -66,6 +67,7 @@ sheetsheader_to_internalreference = {
     "Whatsapp Number": SheetsHeader.REGISTERED_WHATSAPP_NUMBER,
     "Email Address": SheetsHeader.REGISTERED_EMAIL,
     "Language": SheetsHeader.REGISTERED_LANGUAGE,
+    "Book Number": SheetsHeader.REGISTERED_BOOK_NUMBER,
 }
 
 
