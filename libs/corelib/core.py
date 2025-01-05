@@ -260,7 +260,7 @@ def save_recipients_as_image(recipients):
     data = np.array(data)
 
     fig, ax = plt.subplots(figsize=(15, 12))
-    table = ax.table(cellText=data, cellLoc="center", loc="top")
+    table = ax.table(cellText=data, cellLoc="center", loc="center")
     table.auto_set_font_size(True)
     table.auto_set_column_width(col=list(range(len(data[0]))))
     # custom dimensioning
