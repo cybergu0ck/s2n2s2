@@ -23,10 +23,10 @@ IMAGE_NAME = "recipients-list.png"
 
 
 class Member:
-    def __init__(self, name, email):
+    def __init__(self, name, email, phone_number):
         self.name = name
         self.email = email
-        self.phone_number = None
+        self.phone_number = phone_number
         self.whatsapp_number = None
 
 
@@ -154,7 +154,9 @@ def populate_admin_list() -> bool:
         if row_values == []:
             continue
         admin_obj = Member(
-            row_values[0], row_values[1]
+            row_values[0],
+            row_values[1],
+            row_values[2],
         )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
         ADMINS.append(admin_obj)
 
@@ -178,7 +180,7 @@ def populate_purohit_list() -> bool:
         if row_values == []:
             continue
         admin_obj = Member(
-            row_values[0], row_values[1]
+            row_values[0], row_values[1], row_values[2]
         )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
         PUROHITS.append(admin_obj)
 
