@@ -10,7 +10,9 @@ SENDER_EMAIL_ADDRESS = os.environ.get("S2N2S2EMAIL")
 SENDER_EMAIL_KEY = os.environ.get("S2N2S2EMAILKEY")
 
 
-def send_email(email_address, subject, body, attachements=[], is_html=False) -> bool:
+def send_email(
+    email_address, subject, body, attachements=[], cc_addresses=[], is_html=False
+) -> bool:
     """
     Sends an email.
     Args:
@@ -18,6 +20,7 @@ def send_email(email_address, subject, body, attachements=[], is_html=False) -> 
         subject: Subject of the email
         body: Body of the email
         attachements : array of dict's containing path of the file to be attached and name to be given of the attached file.
+        cc_addresses: array of CC email addresses.
     """
     if is_valid_email(email_address):
         smtp_server = "smtp.gmail.com"
@@ -28,6 +31,10 @@ def send_email(email_address, subject, body, attachements=[], is_html=False) -> 
         message["Subject"] = subject
         message["From"] = SENDER_EMAIL_ADDRESS
         message["To"] = email_address
+
+        if cc_addresses:
+            message["Cc"] = ", ".join(cc_addresses)
+
         if is_html:
             body_part = MIMEText(body, "html")
             message.attach(body_part)

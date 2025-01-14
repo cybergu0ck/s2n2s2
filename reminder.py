@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-This script automates the process of accessing a Google Sheet, parsing its contents, and sending messages to recipients based on the data retrieved. It is designed to run on a Raspberry Pi and is to be scheduled for periodic execution.
+This script automates the process of accessing a Google Sheet, parsing its contents, and sending messages to Purohit/Pandit based on the data retrieved. It is designed to run on a Raspberry Pi and is to be scheduled for periodic execution.
 
 This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
 """
@@ -17,7 +17,7 @@ from libs.corelib.core import (
     prepare_data,
     get_todays_recipients,
     save_recipients,
-    dispatch_messages_to_recipients,
+    dispatch_messages_to_purohits,
     perform_cleanup,
     dispatch_message_to_admins,
 )
@@ -51,14 +51,14 @@ def main():
             global RECIPIENTS
             RECIPIENTS = get_todays_recipients()
             if save_recipients(RECIPIENTS):
-                if dispatch_messages_to_recipients(RECIPIENTS):
-                    log_debug("Script completed successfully.")
+                if dispatch_messages_to_purohits(RECIPIENTS):
+                    log_debug("Reminder script completed successfully.")
                     return
-    log_error("Script completed unsuccessfully.")
+    log_error("Reminder script completed unsuccessfully.")
 
 
 if __name__ == "__main__":
     main()
-    dispatch_message_to_admins(RECIPIENTS)
+    # dispatch_message_to_admins(RECIPIENTS)
     perform_cleanup()
     log_debug("\n\n\n")

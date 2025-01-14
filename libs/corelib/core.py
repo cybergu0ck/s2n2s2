@@ -12,15 +12,17 @@ SHEETS_TITLE = "shashwatha-seva-db"
 WORKSHEET_PROD_NAME = "prod"
 WORKSHEET_DEV_NAME = "dev"
 WORKSHEET_ADMIN_NAME = "admins"
+WORKSHEET_PUROHIT_NAME = "purohits"
 WORKSHEET = None
 ADMIN_WORKSHEET = None
+PUROHIT_WORKSHEET = None
 HEADER_ROW = 1
 INTERNALHEADER_TO_COLUMNID = {}
 
 IMAGE_NAME = "recipients-list.png"
 
 
-class Admin:
+class Member:
     def __init__(self, name, email):
         self.name = name
         self.email = email
@@ -36,6 +38,7 @@ ADMIN_WORKHEET_HEADER_INTEGRITY = [
 ]
 
 ADMINS = []
+PUROHITS = []
 
 
 class SheetsHeader(Enum):
@@ -54,6 +57,7 @@ class SheetsHeader(Enum):
     REGISTERED_BOOK_NUMBER = auto()
 
 
+# ANCHOR - Here
 sheetsheader_to_internalreference = {
     "Receipt Number": SheetsHeader.RECEIPT_NUMBER,
     "Receipt Date": SheetsHeader.RECEIPT_DATE,
@@ -88,6 +92,8 @@ def load_google_sheet() -> bool:
             WORKSHEET = sheet.worksheet(WORKSHEET_PROD_NAME)
         global ADMIN_WORKSHEET
         ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_ADMIN_NAME)
+        global PUROHIT_WORKSHEET
+        PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_PUROHIT_NAME)
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
@@ -147,7 +153,7 @@ def populate_admin_list() -> bool:
         row_values = ADMIN_WORKSHEET.row_values(row_id)
         if row_values == []:
             continue
-        admin_obj = Admin(
+        admin_obj = Member(
             row_values[0], row_values[1]
         )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
         ADMINS.append(admin_obj)
@@ -163,6 +169,30 @@ def populate_admin_list() -> bool:
         return True
 
 
+def populate_purohit_list() -> bool:
+    frame = inspect.currentframe()
+
+    admin_name_col = PUROHIT_WORKSHEET.col_values(1)
+    for row_id, cell_value in enumerate(admin_name_col[1:], start=2):
+        row_values = PUROHIT_WORKSHEET.row_values(row_id)
+        if row_values == []:
+            continue
+        admin_obj = Member(
+            row_values[0], row_values[1]
+        )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
+        PUROHITS.append(admin_obj)
+
+    if len(PUROHITS) == 0:
+        log_warning(f"{get_function_name(frame)} unsuccessful.")
+        log_warning(f"Fetched zero purohit from the purohit worksheet.")
+        log_warning(f"Early termination as atleast one purohit is needed to proceed.")
+        return False
+    else:
+        # STUB - log the list of admins here
+        log_debug(f"{get_function_name(frame)} successful.")
+        return True
+
+
 def prepare_data() -> bool:
     """
     Loads the google sheet and initialises the header_to_column mapping.
@@ -171,7 +201,7 @@ def prepare_data() -> bool:
 
     if load_google_sheet():
         if validate_admin_worksheet_header_integrity():
-            if populate_admin_list():
+            if populate_admin_list() and populate_purohit_list():
                 if populate_header_to_column_mapping():
                     log_debug(f"{get_function_name(frame)} successful.")
                     return True
@@ -299,6 +329,10 @@ def get_simple_english_message():
     return "Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today...Regards Temple Trustee, Naloor, Kadaba"
 
 
+def get_message_for_purohit(recipients):
+    return f"Todays Count for Shashwatha Pooja Seva = {len(recipients)}. The list is sent via email."
+
+
 def get_email_body_for_recipient(title, name):
     return f"""Namasthe dear devotee, {title} {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Your Shashwatha Pooja Seva is performed today. May the lord Shankara Narayana bless you and your family members. We look forward for your continuous support. \n\n - Temple Committee"""
 
@@ -318,25 +352,81 @@ def get_email_attachement_for_recipient():
     return res
 
 
+def get_email_body_for_purohit(name, recipients):
+    html = """\
+    <html>
+     <head>
+        <style>
+            p {
+                margin: 20px 0; 
+            }
+            .spacer {
+                height: 30px; /* You can adjust this height as needed */
+            }
+        </style>
+    </head>
+    """
+    html += f"""
+    <body>
+        <p>ನಮಸ್ತೇ, {name}. ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ದೇವಸ್ಥಾನ ಸಮಿತಿಯಿಂದ ದಿನದ ಶುಭಾಶಯಗಳು."</p>
+    """
+
+    if len(recipients) == 0:
+        html += f"""
+        <p>{TODAY} ದಿನಾಂಕದಂದು ಶಾಶ್ವತ ಪೂಜಾ ಸೇವೆ ಇಲ್ಲ.</p>
+        <div class="spacer"></div> 
+        """
+    else:
+        html += f"""
+        <p>{TODAY} ದಿನಾಂಕದಂದು ಶಾಶ್ವತ ಪೂಜೆಯ ಇಂದಿನ ಸೇವಾ ಕರ್ತರ ವಿವರ.</p>
+        """
+        include = [
+            "Name",
+            "Gotra",
+            "Nakshatra",
+            "Rashi",
+        ]
+        html += generate_custom_html_table(recipients, get_header_row(), include)
+        html += """
+        <div class="spacer"></div> 
+        """
+
+    html += f"""
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <p>- Temple Committee</p>
+    </body>
+    </html>
+    """
+    return html
+
+
 def get_email_body_for_admin(name, recipients):
     html = """\
     <html>
+     <head>
+        <style>
+            p {
+                margin: 20px 0; 
+            }
+            .spacer {
+                height: 30px; /* You can adjust this height as needed */
+            }
+        </style>
+    </head>
     """
     html += f"""
     <body>
         <p>Namasthe dear admin, {name}. Greetings of the day from Nalur Shankara Narayana Devasthana.</p>
-        <div class="spacer"></div> 
     """
 
     if len(recipients) == 0:
         html += f"""
         <p>There is no Shashwatha Pooja Seva today, dated {TODAY}</p>
-        <div class="spacer"></div> 
         """
     else:
         html += f"""
         <p>The following is the list of recipients for today's Shashwatha Pooja Seva, dated {TODAY}.</p>
-        <div class="spacer"></div> 
         """
         html += generate_html_table(recipients, get_header_row())
         html += """
@@ -454,6 +544,39 @@ def dispatch_messages_to_recipients(recipients) -> bool:
         return False
 
 
+def dispatch_messages_to_purohits(recipients) -> bool:
+    """"""
+    frame = inspect.currentframe()
+    try:
+        log_debug(f"Dispatching communications to purohits.")
+        for purohit in PUROHITS:
+            log_debug(
+                f"Purohit, Name: {purohit.name}, Phone : {purohit.phone_number}, Email : {purohit.email}."
+            )
+            if PI_MODE and ENABLE_SMS:
+                log_debug(f"Dispatching SMS to {purohit.name}.")
+                message = get_message_for_purohit(recipients)
+                success_sms = dispatch_sms(purohit.phone_number, message, False)
+                if success_sms:
+                    log_debug(f"Dispatching SMS to {purohit.name} successful.")
+                else:
+                    log_warning(f"Dispatching SMS to {purohit.name} unsuccessful.")
+                    # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
+            if ENABLE_EMAIL:
+                subject = "Daily Reminder"
+                attachments = []
+                cc = [admin.email for admin in ADMINS]
+
+                body = get_email_body_for_purohit(purohit.name, recipients)
+                send_email(purohit.email, subject, body, attachments, cc, True)
+            log_debug(f"{get_function_name(frame)} successful.")
+        return True
+    except Exception as e:
+        log_error(f"{get_function_name(frame)} unsuccessful.")
+        log_error(f"Exception : {e}")
+        return False
+
+
 def dispatch_message_to_admins(recipients) -> bool:
     """
     Sends notification email to admins.
@@ -469,9 +592,10 @@ def dispatch_message_to_admins(recipients) -> bool:
             if ENABLE_EMAIL:
                 subject = "Daily Notification"
                 attachments = get_email_attachement_for_admin()
+                cc = []
                 body = get_email_body_for_admin(admin.name, recipients)
                 # TODO- get two email body one clean one and one with message saying relay on manual as there are warning
-                send_email(admin.email, subject, body, attachments, True)
+                send_email(admin.email, subject, body, attachments, cc, True)
 
         log_debug(f"{get_function_name(frame)} successful.")
         return True
@@ -488,13 +612,4 @@ def perform_cleanup():
     log_debug(f"{get_function_name(frame)} successful.")
 
 
-# def dispatch_communications(recipients) -> bool:
-#     frame = inspect.currentframe()
-
-#     if dispatch_messages_to_recipients(recipients):
-#         if dispatch_message_to_admins(recipients):
-#             log_debug(f"{get_function_name(frame)} successful.")
-#             return True
-
-#     log_errror(f"{get_function_name(frame)} unsuccessful.")
-#     return False
+# TODO - Add a class that validates if the sheet is messed, if the header names are messed, this file and the email to purohit will be messed.
