@@ -558,7 +558,8 @@ def dispatch_messages_to_purohits(recipients) -> bool:
             if PI_MODE and ENABLE_SMS:
                 log_debug(f"Dispatching SMS to {purohit.name}.")
                 message = get_message_for_purohit(recipients)
-                success_sms = dispatch_sms(purohit.phone_number, message, False)
+                phone_number = format_phone_number(purohit.phone_number)
+                success_sms = dispatch_sms(phone_number, message, False)
                 if success_sms:
                     log_debug(f"Dispatching SMS to {purohit.name} successful.")
                 else:
