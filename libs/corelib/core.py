@@ -332,7 +332,7 @@ def get_simple_english_message():
 
 
 def get_message_for_purohit(recipients):
-    return f"Todays Count for Shashwatha Pooja Seva = {len(recipients)}. The list is sent via email."
+    return f"Todays Shashwatha Pooja Sevas = {len(recipients)}. The list is sent via email."
 
 
 def get_email_body_for_recipient(title, name):
