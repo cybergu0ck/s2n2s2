@@ -349,21 +349,25 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     character_set = "UCS2" if is_kannada else "IRA"
     text_mode_parameters = True if is_kannada else False
 
-    if (
-        is_valid_phone_number(phone_number)
-        and is_module_functioning()
-        and is_sim_inserted()
-        and is_network_registered()
-        and set_character_set(character_set)
-        and set_text_mode_parameters(text_mode_parameters)
-    ):
-        res = send_sms(phone_number, sms_message, is_kannada)
-    if res:
-        log_debug(
-            f"SMS to <{phone_number}> successful using {'kannada' if is_kannada else 'english'}."
-        )
+    if is_valid_phone_number(phone_number):
+        if (
+            is_module_functioning()
+            and is_sim_inserted()
+            and is_network_registered()
+            and set_character_set(character_set)
+            and set_text_mode_parameters(text_mode_parameters)
+        ):
+            res = send_sms(phone_number, sms_message, is_kannada)
+            if res:
+                log_debug(
+                    f"SMS to <{phone_number}> successful using {'kannada' if is_kannada else 'english'}."
+                )
+            else:
+                log_warning(f"SMS to <{phone_number}> unsuccessful.")
     else:
-        log_warning(f"SMS to <{phone_number}> unsuccessful.")
+        log_warning(
+            f"SMS to <{phone_number}> unsuccessful because of Invalid phone number."
+        )
     return res
 
 
