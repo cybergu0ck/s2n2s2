@@ -380,7 +380,7 @@ def get_email_body_for_purohit(name, recipients):
         """
     else:
         html += f"""
-        <p>{TODAY} ದಿನಾಂಕದಂದು ಶಾಶ್ವತ ಪೂಜೆಯ ಇಂದಿನ ಸೇವಾ ಕರ್ತರ ವಿವರ.</p>
+        <p>{TODAY} ದಿನಾಂಕದಂದು ಶಾಶ್ವತ ಪೂಜೆಯ ಇಂದಿನ ಸೇವಾಕರ್ತರ ವಿವರ.</p>
         """
         include = [
             "Name",
