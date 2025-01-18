@@ -570,7 +570,25 @@ def dispatch_messages_to_purohits(recipients) -> bool:
 
                 body = get_email_body_for_purohit(purohit.name, recipients)
                 send_email(purohit.email, subject, body, attachments, cc, True)
-            log_debug(f"{get_function_name(frame)} successful.")
+
+        # The following is a side effect, the function is doing more that it states but it is fine for now
+        log_debug(f"Dispatching communications to admins.")
+        for admin in ADMINS:
+            log_debug(
+                f"Admin, Name: {admin.name}, Phone : {admin.phone_number}, Email : {admin.email}."
+            )
+            if PI_MODE and ENABLE_SMS:
+                log_debug(f"Dispatching SMS to {admin.name}.")
+                message = get_message_for_purohit(recipients)  # Intentional
+                phone_number = format_phone_number(admin.phone_number)
+                success_sms = dispatch_sms(phone_number, message, False)
+                if success_sms:
+                    log_debug(f"Dispatching SMS to {admin.name} successful.")
+                else:
+                    log_warning(f"Dispatching SMS to {admin.name} unsuccessful.")
+                    # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
+
+        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
         log_error(f"{get_function_name(frame)} unsuccessful.")
