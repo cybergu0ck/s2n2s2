@@ -171,3 +171,5 @@ Follow these steps :
 # Google smtp
 
 Need to create a google app and use the generated app password to be able to send gmail using smtp server.
+
+- The email and the app password is to be saved as environment variables (in ~/.bashrc in the case of linux)
