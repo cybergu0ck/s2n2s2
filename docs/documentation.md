@@ -166,6 +166,23 @@ Follow these steps :
 
 <br>
 <br>
+
+## SSH
+
+Check if the device is in the network using :
+
+```bash
+ping <username>@<hostname>.local
+```
+
+SSH to it using :
+
+```bash
+ssh <username>@<hostname>.local
+```
+
+<br>
+<br>
 <br>
 
 # Google smtp
