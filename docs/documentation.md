@@ -1,19 +1,23 @@
-# Setting up gspread
+# API
+
+<br>
+<br>
+
+## Setting up gspread
 
 Follow [official documentation](https://docs.gspread.org/en/latest/oauth2.html#service-account) for setting up gspread apis.
 
 <br>
 
-## Enable api access for a project
+### Enable api access for a project
 
 1. Head to [Google Developers Console](https://console.cloud.google.com/apis/dashboard) and create a new project (or select the one you already have).
 1. In the box labeled “Search for APIs and Services”, search for “Google Drive API” and enable it.
 1. In the box labeled “Search for APIs and Services”, search for “Google Sheets API” and enable it.
 
 <br>
-<br>
 
-## Using a serive account (basically a bot)
+### Using a serive account (basically a bot)
 
 1. Enable to API access if not done already.
 1. Go to “APIs & Services > Credentials” and choose “Create credentials > Service account key”.
@@ -45,7 +49,23 @@ Follow [official documentation](https://docs.gspread.org/en/latest/oauth2.html#s
 <br>
 <br>
 
-# Setting up serial port on raspberry pi
+# Raspberry pi setup
+
+<br>
+<br>
+
+## Static ip address
+
+- Use the latest network manager tool.
+
+  ```bash
+  sudo nmtui
+  ```
+
+<br>
+<br>
+
+## Setting up serial port on raspberry pi
 
 To get a basic understanding, watch [this video](https://www.youtube.com/watch?v=oevxqPk78sM) and [Saravanan's video](https://www.youtube.com/watch?v=LMQJAOjxFaw).
 
@@ -82,9 +102,8 @@ Follow the following steps:
 
 <br>
 <br>
-<br>
 
-# Setting up a cron job
+## Setting up a cron job
 
 Follow these steps :
 
@@ -135,9 +154,8 @@ Follow these steps :
 
 <br>
 <br>
-<br>
 
-# Using minicom
+## Using minicom
 
 - Ensure minicom is installed using the relevant linux package manager.
 - Run the following :
@@ -145,3 +163,11 @@ Follow these steps :
   sudo minicom -s
   ```
 - I get an interface to change some settings where I set the correct port setting to `ttyS0` in this case and the minicom is got upon escaping after the settings interface.
+
+<br>
+<br>
+<br>
+
+# Google smtp
+
+Need to create a google app and use the generated app password to be able to send gmail using smtp server.
