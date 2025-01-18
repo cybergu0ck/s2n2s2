@@ -368,7 +368,7 @@ def get_email_body_for_purohit(name, recipients):
     """
     html += f"""
     <body>
-        <p>ನಮಸ್ತೇ, {name}. ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ದೇವಸ್ಥಾನ ಸಮಿತಿಯಿಂದ ದಿನದ ಶುಭಾಶಯಗಳು."</p>
+        <p>ನಮಸ್ತೇ, {name}. ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ದೇವಸ್ಥಾನ ಸಮಿತಿಯಿಂದ ದಿನದ ಶುಭಾಶಯಗಳು.</p>
     """
 
     if len(recipients) == 0:
