@@ -8,11 +8,7 @@ from enum import Enum, auto
 import matplotlib.pyplot as plt
 import numpy as np
 
-SHEETS_TITLE = "shashwatha-seva-db"
-WORKSHEET_PROD_NAME = "prod"
-WORKSHEET_DEV_NAME = "dev"
-WORKSHEET_ADMIN_NAME = "admins"
-WORKSHEET_PUROHIT_NAME = "purohits"
+
 WORKSHEET = None
 ADMIN_WORKSHEET = None
 PUROHIT_WORKSHEET = None
@@ -86,14 +82,16 @@ def load_google_sheet() -> bool:
         gc = gspread.service_account()
         sheet = gc.open(SHEETS_TITLE)
         global WORKSHEET
-        if DEV_MODE:
-            WORKSHEET = sheet.worksheet(WORKSHEET_DEV_NAME)
-        else:
-            WORKSHEET = sheet.worksheet(WORKSHEET_PROD_NAME)
         global ADMIN_WORKSHEET
-        ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_ADMIN_NAME)
         global PUROHIT_WORKSHEET
-        PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_PUROHIT_NAME)
+        if DEV_MODE:
+            WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_RECIPIENTS)
+            ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_ADMINS)
+            PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_PUROHITS)
+        else:
+            WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_RECIPIENTS)
+            ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_ADMINS)
+            PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_PUROHITS)
         log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:

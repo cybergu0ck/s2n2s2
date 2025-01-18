@@ -24,6 +24,15 @@ PATH_IMAGE_ASSETS_DIR = os.path.join(PATH_ASSETS_DIR, "images")
 DIR_NAME_TEMP = "temp"
 PATH_TEMP_DIR = os.path.join(PATH_ROOT_DIR, DIR_NAME_TEMP)
 
+SHEETS_TITLE = "shashwatha-seva-db"
+WORKSHEET_NAME_PROD_RECIPIENTS = "prod"
+WORKSHEET_NAME_PROD_ADMINS = "admins"
+WORKSHEET_NAME_PROD_PUROHITS = "purohits"
+
+WORKSHEET_NAME_DEV_RECIPIENTS = "dev-recipients"
+WORKSHEET_NAME_DEV_ADMINS = "dev-admins"
+WORKSHEET_NAME_DEV_PUROHITS = "dev-purohits"
+
 
 def create_log_directories():
     """
