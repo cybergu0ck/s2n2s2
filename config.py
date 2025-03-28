@@ -2,7 +2,7 @@
 import os
 import shutil
 
-DEV_MODE = True
+DEV_MODE = False
 PI_MODE = True
 ENABLE_SMS = True
 ENABLE_EMAIL = True
