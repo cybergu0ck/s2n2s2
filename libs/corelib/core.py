@@ -517,7 +517,9 @@ def dispatch_messages_to_recipients(recipients) -> bool:
                     if is_kannada
                     else get_simple_english_message()
                 )
-                success_sms = dispatch_sms(phone_num, simple_message, is_kannada)
+                success_sms = dispatch_sms(
+                    phone_num, simple_message, is_kannada
+                )  # TODO - What happens if an empty string is received for phone_num?
                 if success_sms:
                     log_debug(f"Dispatching SMS to {title} {name} successful.")
                 else:
@@ -529,12 +531,17 @@ def dispatch_messages_to_recipients(recipients) -> bool:
                 subject = "Confirmation : Shashwatha Pooja Seva"
                 body = get_email_body_for_recipient(title, name)
                 attachments = get_email_attachement_for_recipient()
-                success_email = send_email(email_address, subject, body, attachments)
-                if success_email:
-                    log_debug(f"Dispatching Email to {title} {name} successful.")
-                else:
-                    log_warning(f"Dispatching Email to {title} {name} unsuccessful.")
-                    # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
+                if email_address:
+                    success_email = send_email(
+                        email_address, subject, body, attachments
+                    )
+                    if success_email:
+                        log_debug(f"Dispatching Email to {title} {name} successful.")
+                    else:
+                        log_warning(
+                            f"Dispatching Email to {title} {name} unsuccessful."
+                        )
+                        # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
             time.sleep(10)
         log_debug(f"{get_function_name(frame)} successful.")
         return True
@@ -567,9 +574,9 @@ def dispatch_messages_to_purohits(recipients) -> bool:
                 subject = "Daily Reminder"
                 attachments = []
                 cc = [admin.email for admin in ADMINS]
-
                 body = get_email_body_for_purohit(purohit.name, recipients)
-                send_email(purohit.email, subject, body, attachments, cc, True)
+                if purohit.email:
+                    send_email(purohit.email, subject, body, attachments, cc, True)
 
         # The following is a side effect, the function is doing more that it states but it is fine for now
         log_debug(f"Dispatching communications to admins.")
@@ -614,7 +621,8 @@ def dispatch_message_to_admins(recipients) -> bool:
                 cc = []
                 body = get_email_body_for_admin(admin.name, recipients)
                 # TODO- get two email body one clean one and one with message saying relay on manual as there are warning
-                send_email(admin.email, subject, body, attachments, cc, True)
+                if admin.email:
+                    send_email(admin.email, subject, body, attachments, cc, True)
 
         log_debug(f"{get_function_name(frame)} successful.")
         return True
