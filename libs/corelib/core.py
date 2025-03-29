@@ -524,9 +524,8 @@ def dispatch_messages_to_recipients(recipients) -> bool:
         )
 
 
-# TODO - Change the name from dispatch_messages_to_purohits to dispatch_messages_to_purohits_and_admins
 @enable_log
-def dispatch_messages_to_purohits(recipients) -> bool:
+def dispatch_messages_to_purohits_and_admins(recipients) -> bool:
     """"""
     try:
         for purohit in PUROHITS:
@@ -551,7 +550,6 @@ def dispatch_messages_to_purohits(recipients) -> bool:
                 body = get_email_body_for_purohit(purohit.name, recipients)
                 send_email(purohit.email, subject, body, attachments, cc, True)
 
-        # The following is a side effect, the function is doing more that it states but it is fine for now
         log_debug(f"Dispatching communications to admins.")
         for admin in ADMINS:
             log_debug(

@@ -17,7 +17,7 @@ from libs.corelib.core import (
     prepare_data,
     get_todays_recipients,
     save_recipients,
-    dispatch_messages_to_purohits,
+    dispatch_messages_to_purohits_and_admins,
     perform_cleanup,
     dispatch_message_to_admins,
 )
@@ -51,7 +51,7 @@ def main():
             global RECIPIENTS
             RECIPIENTS = get_todays_recipients()
             if save_recipients(RECIPIENTS):
-                if dispatch_messages_to_purohits(RECIPIENTS):
+                if dispatch_messages_to_purohits_and_admins(RECIPIENTS):
                     log_debug("Reminder script completed successfully.")
                     return
     log_error("Reminder script completed unsuccessfully.")
