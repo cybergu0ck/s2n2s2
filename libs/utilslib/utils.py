@@ -7,6 +7,20 @@ TODAY = datetime.today().strftime("%d/%m/%Y")
 TODAY_FOR_LOG = datetime.today().strftime("%Y-%m-%d")
 
 
+def enable_log(func):
+    def wrapper():
+        try:
+            log_debug(f"{func.__name__} was called.")
+            func()
+            log_debug(f"{func.__name__} was successful.")
+            return True
+        except Exception as e:
+            log_error(f"{func.__name__} was unsuccesful.\n{e}\n\n")
+            return False
+
+    return wrapper
+
+
 def increment_filename(filename):
     res = ""
     seperator = "_"

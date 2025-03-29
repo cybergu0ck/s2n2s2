@@ -75,141 +75,6 @@ def get_num_cols():
     return len(sheetsheader_to_internalreference)
 
 
-def load_google_sheet() -> bool:
-    frame = inspect.currentframe()
-
-    try:
-        gc = gspread.service_account()
-        sheet = gc.open(SHEETS_TITLE)
-        global WORKSHEET
-        global ADMIN_WORKSHEET
-        global PUROHIT_WORKSHEET
-        if DEV_MODE:
-            WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_RECIPIENTS)
-            ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_ADMINS)
-            PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_PUROHITS)
-        else:
-            WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_RECIPIENTS)
-            ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_ADMINS)
-            PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_PUROHITS)
-        log_debug(f"{get_function_name(frame)} successful.")
-        return True
-    except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-        return False
-
-
-def populate_header_to_column_mapping() -> bool:
-    """
-    Populates a map with keys as internal header references (encoded column headings) and the values as columen id.
-    Populates a map with keys as internal header references (encoded column headings) and the values as columen id.
-    - This ensures that script will not fail if columns are interchanged or modified.
-    - The
-    - Example: {nakshatra: 5, rashi : 6}
-    """
-    frame = inspect.currentframe()
-
-    try:
-        global INTERNALHEADER_TO_COLUMNID
-        header_row_values = WORKSHEET.row_values(HEADER_ROW)
-        for id, header in enumerate(header_row_values):
-            col_id = id + 1
-            INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = (
-                col_id
-            )
-        log_debug(f"{get_function_name(frame)} successful.")
-        return True
-    except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Error found in internal header mapping code.")
-        log_error(
-            f"Check if the header names in the worksheet and in sheetsheader_to_internalreference consistant."
-        )
-        log_error(f"Exception : {e}")
-        return False
-
-
-def validate_admin_worksheet_header_integrity() -> bool:
-    frame = inspect.currentframe()
-
-    header_row = ADMIN_WORKSHEET.row_values(1)
-    if header_row == ADMIN_WORKHEET_HEADER_INTEGRITY:
-        log_debug(f"{get_function_name(frame)} successful.")
-        return True
-    else:
-        log_error(f"{get_function_name(frame)} unsuccessful. ")
-        log_error(f"The admin workheet header seems to be modified.")
-        return False
-
-
-def populate_admin_list() -> bool:
-    frame = inspect.currentframe()
-
-    admin_name_col = ADMIN_WORKSHEET.col_values(1)
-    for row_id, cell_value in enumerate(admin_name_col[1:], start=2):
-        row_values = ADMIN_WORKSHEET.row_values(row_id)
-        if row_values == []:
-            continue
-        admin_obj = Member(
-            row_values[0],
-            row_values[1],
-            row_values[2],
-        )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
-        ADMINS.append(admin_obj)
-
-    if len(ADMINS) == 0:
-        log_warning(f"{get_function_name(frame)} unsuccessful.")
-        log_warning(f"Fetched zero admin from the admin worksheet.")
-        log_warning(f"Early termination as atleast one admin is needed to proceed.")
-        return False
-    else:
-        # STUB - log the list of admins here
-        log_debug(f"{get_function_name(frame)} successful.")
-        return True
-
-
-def populate_purohit_list() -> bool:
-    frame = inspect.currentframe()
-
-    admin_name_col = PUROHIT_WORKSHEET.col_values(1)
-    for row_id, cell_value in enumerate(admin_name_col[1:], start=2):
-        row_values = PUROHIT_WORKSHEET.row_values(row_id)
-        if row_values == []:
-            continue
-        admin_obj = Member(
-            row_values[0], row_values[1], row_values[2]
-        )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
-        PUROHITS.append(admin_obj)
-
-    if len(PUROHITS) == 0:
-        log_warning(f"{get_function_name(frame)} unsuccessful.")
-        log_warning(f"Fetched zero purohit from the purohit worksheet.")
-        log_warning(f"Early termination as atleast one purohit is needed to proceed.")
-        return False
-    else:
-        # STUB - log the list of admins here
-        log_debug(f"{get_function_name(frame)} successful.")
-        return True
-
-
-def prepare_data() -> bool:
-    """
-    Loads the google sheet and initialises the header_to_column mapping.
-    """
-    frame = inspect.currentframe()
-
-    if load_google_sheet():
-        if validate_admin_worksheet_header_integrity():
-            if populate_admin_list() and populate_purohit_list():
-                if populate_header_to_column_mapping():
-                    log_debug(f"{get_function_name(frame)} successful.")
-                    return True
-
-    log_error(f"{get_function_name(frame)} unsuccessful.")
-    return False
-
-
 def append_empty_values(recipient, diff):
     for i in range(diff):
         recipient.append("")
@@ -224,36 +89,6 @@ def preprocess_retrived_data(recipients):
         if len(recipient) != num_cols:
             diff = num_cols - len(recipient)
             append_empty_values(recipient, diff)
-
-
-def get_todays_recipients() -> list[list[str]]:
-    """
-    Retrieves processed recipient data for entries registered today.
-
-    Returns:
-        list: A list of rows containing recipient data where the registered date matches today's date.
-        example : [['1','Ramesh', 'ramesh@email.com'],['19','Suresh', 'suresh@email.com'] ]
-    """
-    frame = inspect.currentframe()
-    log_debug(f"{get_function_name(frame)} called.")
-
-    res = []
-    try:
-        date_column_values = WORKSHEET.col_values(
-            INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_DATE]
-        )
-        for row_id, cell_value in enumerate(date_column_values[1:], start=2):
-            if is_valid_date(cell_value):
-                if cell_value[:5] == TODAY[:5]:
-                    row_values = WORKSHEET.row_values(row_id)
-                    res.append(row_values)
-
-        preprocess_retrived_data(res)
-        log_debug(f"{get_function_name(frame)} successful.")
-    except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-    return res
 
 
 def log_todays_recipients(recipients):
@@ -282,7 +117,6 @@ def get_header_row():
 
 def save_recipients_as_image(recipients):
     if len(recipients) == 0:
-        log_debug(f"Recipient data not saved as image as it is empty.")
         return
     data = recipients.copy()
     header_row = get_header_row()
@@ -300,59 +134,25 @@ def save_recipients_as_image(recipients):
 
     path_to_image = os.path.join(PATH_TEMP_DIR, IMAGE_NAME)
     plt.savefig(path_to_image, dpi=300)
-    log_debug(f"Recipient data saved as image at {path_to_image}.")
 
 
-def save_recipients(recipients) -> bool:
-    """
-    Log the recipients data and save an image containing list of the recipients
-    """
-    frame = inspect.currentframe()
-
-    try:
-        log_todays_recipients(recipients)
-        save_recipients_as_image(recipients)
-
-        log_debug(f"{get_function_name(frame)} successful.")
-        return True
-    except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-        return False
-
-
-def get_simple_kannada_message():
+def get_simple_kannada_message() -> str:
     return "ನಿಮ್ಮ ನಾಲೂರು ಶಂಕರ ನಾರಾಯಣ ದೇವರ ಶಾಶ್ವತ ಪೂಜಾ ಸೇವೆ ಇಂದು ನಡೆಯಲಿದೆ"
 
 
-def get_simple_english_message():
+def get_simple_english_message() -> str:
     return "Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today...Regards Temple Trustee, Naloor, Kadaba"
 
 
-def get_message_for_purohit(recipients):
+def get_message_for_purohit(recipients) -> str:
     return f"Todays Shashwatha Pooja Sevas = {len(recipients)}. The list is sent via email."
 
 
-def get_email_body_for_recipient(title, name):
+def get_email_body_for_recipient(title, name) -> str:
     return f"""Namasthe dear devotee, {title} {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Your Shashwatha Pooja Seva is performed today. May the lord Shankara Narayana bless you and your family members. We look forward for your continuous support. \n\n - Temple Committee"""
 
 
-def get_email_attachement_for_recipient():
-    frame = inspect.currentframe()
-
-    res = []
-    try:
-        standard_image = {}
-        standard_image["path"] = os.path.join(PATH_IMAGE_ASSETS_DIR, "standard.jpeg")
-        standard_image["name"] = "NalurShankaraNarayana.jpeg"
-        res.append(standard_image)
-    except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-    return res
-
-
-def get_email_body_for_purohit(name, recipients):
+def get_email_body_for_purohit(name, recipients) -> str:
     html = """\
     <html>
      <head>
@@ -401,7 +201,7 @@ def get_email_body_for_purohit(name, recipients):
     return html
 
 
-def get_email_body_for_admin(name, recipients):
+def get_email_body_for_admin(name, recipients) -> str:
     html = """\
     <html>
      <head>
@@ -444,10 +244,194 @@ def get_email_body_for_admin(name, recipients):
     return html
 
 
-def get_email_attachement_for_admin():
-    frame = inspect.currentframe()
-    res = []
+@enable_log
+def load_google_sheet() -> bool:
     try:
+        gc = gspread.service_account()
+        sheet = gc.open(SHEETS_TITLE)
+        global WORKSHEET
+        global ADMIN_WORKSHEET
+        global PUROHIT_WORKSHEET
+        if DEV_MODE:
+            WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_RECIPIENTS)
+            ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_ADMINS)
+            PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_DEV_PUROHITS)
+        else:
+            WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_RECIPIENTS)
+            ADMIN_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_ADMINS)
+            PUROHIT_WORKSHEET = sheet.worksheet(WORKSHEET_NAME_PROD_PUROHITS)
+        return True
+    except Exception as e:
+        raise Exception(
+            f"EXCEPTION : {e}.\n" f"LIKELY_CAUSE: problem with google sheets api."
+        )
+
+
+@enable_log
+def populate_header_to_column_mapping() -> bool:
+    """
+    Populates a map with keys as internal header references (encoded column headings) and the values as columen id.
+    Populates a map with keys as internal header references (encoded column headings) and the values as columen id.
+    - This ensures that script will not fail if columns are interchanged or modified.
+    - The
+    - Example: {nakshatra: 5, rashi : 6}
+    """
+    try:
+        global INTERNALHEADER_TO_COLUMNID
+        header_row_values = WORKSHEET.row_values(HEADER_ROW)
+        for id, header in enumerate(header_row_values):
+            col_id = id + 1
+            INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = (
+                col_id
+            )
+        return True
+    except Exception as e:
+        raise Exception(
+            f"EXCEPTION : {e}.\n"
+            f"LIKELY_CAUSE : problem in mapping of internal headers due to inconsistency in header names in worksheet and sheetsheader_to_internalreference variable.\n"
+        )
+
+
+@enable_log
+def validate_admin_worksheet_header_integrity() -> bool:
+    header_row = ADMIN_WORKSHEET.row_values(1)
+    if header_row == ADMIN_WORKHEET_HEADER_INTEGRITY:
+        return True
+    else:
+        raise Exception(
+            "LIKELY_CAUSE : problem in integrity of header row structure. Check if admin worksheet is tampered."
+        )
+
+
+@enable_log
+def populate_admin_list() -> bool:
+    try:
+        admin_name_col = ADMIN_WORKSHEET.col_values(1)
+        for row_id, cell_value in enumerate(admin_name_col[1:], start=2):
+            row_values = ADMIN_WORKSHEET.row_values(row_id)
+            if row_values == []:
+                continue
+            admin_obj = Member(
+                row_values[0],
+                row_values[1],
+                row_values[2],
+            )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
+            ADMINS.append(admin_obj)
+
+        if len(ADMINS) == 0:
+            raise Exception(
+                f"LIKELY_CAUSE: Problem in fetching admin data. Found zero admin, Need atleast one admin to proceed."
+            )
+        else:
+            # STUB - log the list of admins here
+            return True
+    except Exception as e:
+        raise e
+
+
+@enable_log
+def populate_purohit_list() -> bool:
+    try:
+        admin_name_col = PUROHIT_WORKSHEET.col_values(1)
+        for row_id, cell_value in enumerate(admin_name_col[1:], start=2):
+            row_values = PUROHIT_WORKSHEET.row_values(row_id)
+            if row_values == []:
+                continue
+            admin_obj = Member(
+                row_values[0], row_values[1], row_values[2]
+            )  # REVIEW - Hardcoded, infact the code related to admin is not written according to clean code practices, revist some time later
+            PUROHITS.append(admin_obj)
+
+        if len(PUROHITS) == 0:
+            raise Exception(
+                f"LIKELY_CAUSE: Problem in fetching purohit data. Found zero purohit, Need atleast one purohit to proceed."
+            )
+        else:
+            # STUB - log the list of admins here
+            return True
+    except Exception as e:
+        raise e
+
+
+@enable_log
+def prepare_data() -> bool:
+    """
+    Loads the google sheet and initialises the header_to_column mapping.
+    """
+    if load_google_sheet():
+        if validate_admin_worksheet_header_integrity():
+            if populate_admin_list() and populate_purohit_list():
+                if populate_header_to_column_mapping():
+                    return True
+    raise Exception(f"LIKELY : Failed to prepare data.")
+
+
+@enable_log
+def get_todays_recipients() -> list[list[str]]:
+    """
+    Retrieves processed recipient data for entries registered today.
+
+    Returns:
+        list: A list of rows containing recipient data where the registered date matches today's date.
+        example : [['1','Ramesh', 'ramesh@email.com'],['19','Suresh', 'suresh@email.com'] ]
+    """
+    try:
+        res = []
+        date_column_values = WORKSHEET.col_values(
+            INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_DATE]
+        )
+        for row_id, cell_value in enumerate(date_column_values[1:], start=2):
+            if is_valid_date(cell_value):
+                if (
+                    cell_value[:5] == TODAY[:5]
+                ):  # NOTE - The dates will be like 01/01/2025, need to ignore the year
+                    row_values = WORKSHEET.row_values(row_id)
+                    res.append(row_values)
+        preprocess_retrived_data(res)
+        return res
+    except Exception as e:
+        raise Exception(
+            f"EXCEPTION : {e}.\n"
+            f"LIKELY_CAUSE :  problem with core logic, could be a new edge case."
+        )
+
+
+@enable_log
+def save_recipients(recipients) -> bool:
+    """
+    Log the recipients data and save an image containing list of the recipients
+    """
+    try:
+        log_todays_recipients(recipients)
+        save_recipients_as_image(recipients)
+        return True
+    except Exception as e:
+        raise Exception(
+            f"EXCEPTION : {e}."
+            f"LIKELY_CAUSE : problem with core logic, could be a new edge case."
+        )
+
+
+@enable_log
+def get_email_attachement_for_recipient() -> list[dict[str, str]]:
+    try:
+        res = []
+        standard_image = {}
+        standard_image["path"] = os.path.join(PATH_IMAGE_ASSETS_DIR, "standard.jpeg")
+        standard_image["name"] = "NalurShankaraNarayana.jpeg"
+        res.append(standard_image)
+        return res
+    except Exception as e:
+        raise Exception(
+            f"EXCEPTION : {e}\n"
+            f"LIKELY_CAUSE: problem with the path where the image assets are kept."
+        )
+
+
+@enable_log
+def get_email_attachement_for_admin() -> list[dict[str, str]]:
+    try:
+        res = []
         path_to_img = os.path.join(PATH_TEMP_DIR, IMAGE_NAME)
         if os.path.exists(path_to_img):
             recipients_image = {}
@@ -462,20 +446,17 @@ def get_email_attachement_for_admin():
         log_debug_file["path"] = get_path_to_current_session_log(True)
         log_debug_file["name"] = get_path_to_current_session_log(True).split(os.sep)[-1]
         res.append(log_debug_file)
+        return res
     except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-    return res
+        raise Exception(f"EXCEPTION : {e}.\n" f"LIKELY_CAUSE : problem with the path.")
 
 
+@enable_log
 def dispatch_messages_to_recipients(recipients) -> bool:
     """
     Sends confirmation SMS and Email messages to the list of recipients.
     """
-    frame = inspect.currentframe()
-
     try:
-        log_debug(f"Dispatching messages to recipients.")
         for recipient in recipients:
             title = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1
@@ -536,19 +517,18 @@ def dispatch_messages_to_recipients(recipients) -> bool:
                     log_warning(f"Dispatching Email to {title} {name} unsuccessful.")
                     # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
             time.sleep(10)
-        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-        return False
+        raise Exception(
+            f"EXCEPTION : {e}.\n" f"LIKELY_CAUSE : problem with core logic."
+        )
 
 
+# TODO - Change the name from dispatch_messages_to_purohits to dispatch_messages_to_purohits_and_admins
+@enable_log
 def dispatch_messages_to_purohits(recipients) -> bool:
     """"""
-    frame = inspect.currentframe()
     try:
-        log_debug(f"Dispatching communications to purohits.")
         for purohit in PUROHITS:
             log_debug(
                 f"Purohit, Name: {purohit.name}, Phone : {purohit.phone_number}, Email : {purohit.email}."
@@ -587,23 +567,19 @@ def dispatch_messages_to_purohits(recipients) -> bool:
                 else:
                     log_warning(f"Dispatching SMS to {admin.name} unsuccessful.")
                     # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
-
-        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-        return False
+        raise Exception(
+            f"EXCEPTION : {e}.\n" f"LIKELY_CAUSE : problem with core logic."
+        )
 
 
+@enable_log
 def dispatch_message_to_admins(recipients) -> bool:
     """
-    Sends notification email to admins.
+    Sends custom notification email to only admins.
     """
-    frame = inspect.currentframe()
-
     try:
-        log_debug(f"Dispatching communications to admins.")
         for admin in ADMINS:
             log_debug(
                 f"Admin, Name: {admin.name}, Phone : {admin.phone_number}, Email : {admin.email}."
@@ -615,20 +591,22 @@ def dispatch_message_to_admins(recipients) -> bool:
                 body = get_email_body_for_admin(admin.name, recipients)
                 # TODO- get two email body one clean one and one with message saying relay on manual as there are warning
                 send_email(admin.email, subject, body, attachments, cc, True)
-
-        log_debug(f"{get_function_name(frame)} successful.")
         return True
     except Exception as e:
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        log_error(f"Exception : {e}")
-        return False
+        raise Exception(
+            f"EXCEPTION : {e}.\n" f"LIKELY_CAUSE : problem with core logic."
+        )
 
 
+@enable_log
 def perform_cleanup():
-    frame = inspect.currentframe()
-    if PI_MODE and ENABLE_SMS:
-        close_serial()
-    log_debug(f"{get_function_name(frame)} successful.")
+    try:
+        if PI_MODE and ENABLE_SMS:
+            close_serial()
+    except Exception as e:
+        raise Exception(
+            f"EXCEPTION : {e}.\n" f"LIKELY_CAUSE : problem closing the serial port."
+        )
 
 
 # TODO - Add a class that validates if the sheet is messed, if the header names are messed, this file and the email to purohit will be messed.
