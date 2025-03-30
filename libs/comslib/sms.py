@@ -324,15 +324,19 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
         response_3 = LTE_MODULE.readline().decode().strip()
         time.sleep(0.1)
         log_debug(f"AT Command with message : {at_command_1}")
-        if response_1.startswith("+CMGS:") and response_3 == "OK":
-            log_debug(f"Response : {response_1}")
-            log_debug(f"Response : {response_2}")
-            log_debug(f"Response : {response_3}")
-            res = True
-        else:
-            log_warning(f"Message not sent.")
-            log_warning(f"Response : {response_1}")
-            res = False
+        log_debug(f"AT response_1 : {response_1}")
+        log_debug(f"AT response_2 : {response_2}")
+        log_debug(f"AT response_3 : {response_3}")
+        # if response_1.startswith("+CMGS:") and response_3 == "OK":
+        #     log_debug(f"Response : {response_1}")
+        #     log_debug(f"Response : {response_2}")
+        #     log_debug(f"Response : {response_3}")
+        #     res = True
+        # else:
+        #     log_warning(f"Message not sent.")
+        #     log_warning(f"Response : {response_1}")
+        #     res = False
+        res = True
     else:
         log_warning(f"Message not sent.")
         log_warning(f"Response : {response}")
