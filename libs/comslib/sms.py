@@ -87,7 +87,7 @@ def is_module_functioning() -> bool:
     flush_output()
     res = False
     LTE_MODULE.write(b"AT\r")
-    time.sleep(2)
+    time.sleep(0.5)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check if module is functioning : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
@@ -314,7 +314,7 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
     response = LTE_MODULE.readline().decode().strip()
     if response == ">":
         LTE_MODULE.write(
-            f"{sms_message}\x1A".encode()
+            f"{sms_message}\x1a".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
         time.sleep(2)
         at_command = LTE_MODULE.readline().decode().strip()
