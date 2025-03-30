@@ -365,6 +365,11 @@ def delete_received_sms() -> bool:
 
 
 def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
+    time.sleep(2)
+    flush_input()
+    flush_output()
+    time.sleep(2)
+
     res = False
     character_set = "UCS2" if is_kannada else "IRA"
     text_mode_parameters = True if is_kannada else False
