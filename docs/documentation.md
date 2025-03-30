@@ -164,6 +164,10 @@ Follow these steps :
   ```
 - I get an interface to change some settings where I set the correct port setting to `ttyS0` in this case and the minicom is got upon escaping after the settings interface.
 
+- Use the following to exit the minicom terminal
+
+  `Ctrl + A, X`
+
 <br>
 <br>
 
