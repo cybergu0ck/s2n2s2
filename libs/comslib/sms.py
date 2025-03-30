@@ -322,6 +322,7 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
         response_3 = LTE_MODULE.readline().decode().strip()
+        time.sleep(0.1)
         log_debug(f"AT Command with message : {at_command_1}")
         if response_1.startswith("+CMGS:") and response_3 == "OK":
             log_debug(f"Response : {response_1}")
