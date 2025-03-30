@@ -349,7 +349,7 @@ def delete_received_sms() -> bool:
     res = False
     flush_input()
     flush_output()
-    LTE_MODULE.write(f'AT+CMGD=0,4"\r'.encode())
+    LTE_MODULE.write(f"AT+CMGD=0,4\r".encode())  # at+cmgd=0,4
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to send message : {at_command}")
