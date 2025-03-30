@@ -325,9 +325,15 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
         time.sleep(0.1)
         log_debug(f"AT Command with message : {at_command_1}")
         if (
-            response_1.startswith("+CMGS:")
-            or response_2.startswith("+CMGS:")
-            or response_3.startswith("+CMGS:")
+            not any(
+                resp.startswith("+CMS ERROR:")
+                for resp in (response_1, response_2, response_3)
+            )
+        ) and (
+            any(
+                resp.startswith("+CMGS:")
+                for resp in (response_1, response_2, response_3)
+            )
         ):
             log_debug(f"Response : {response_1}")
             log_debug(f"Response : {response_2}")
