@@ -389,6 +389,7 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
         log_warning(
             f"SMS to <{phone_number}> unsuccessful because of Invalid phone number."
         )
+    log_debug(f"\n\n")
     return res
 
 
