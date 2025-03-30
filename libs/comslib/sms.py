@@ -22,6 +22,7 @@ def flush_output():
 def get_service_provider() -> str:
     """Returns the service provider associated with the sim card inserted in the simcom lte module if fetchable else returns empty string."""
     res = ""
+    flush_input()
     flush_output()
     LTE_MODULE.write(b"AT+CSPN?\r")
     time.sleep(0.1)
@@ -36,7 +37,6 @@ def get_service_provider() -> str:
         log_warning(f"Unable to fetch service provider detail.")
         log_warning(f"Response : {response}")
 
-    flush_input()
     return res
 
 
@@ -49,6 +49,7 @@ def get_phone_number() -> str:
 def get_signal_strength() -> str:
     """Returns the signal strength detail if fetchable else returns empty string."""
     res = ""
+    flush_input()
     flush_output()
     LTE_MODULE.write(b"AT+CSQ\r")
     time.sleep(0.1)
@@ -78,12 +79,12 @@ def get_signal_strength() -> str:
     else:
         log_warning(f"Unable to fetch network signal strength detail.")
         log_warning(f"Response : {response}")
-    flush_input()
     return res
 
 
 def is_module_functioning() -> bool:
     """Returns True if the simcom lte module is functioning, else False."""
+    flush_input()
     flush_output()
     res = False
     LTE_MODULE.write(b"AT\r")
@@ -98,13 +99,13 @@ def is_module_functioning() -> bool:
         log_warning(f"Module is not functioning correctly, restart is suggested.")
         log_warning(f"Response : {response}")
         res = False
-    flush_input()
     return res
 
 
 def is_sim_inserted() -> bool:
     """Returns True if sim card is inserted in the simcom lte module, else False."""
     res = False
+    flush_input()
     flush_output()
     LTE_MODULE.write(b"AT+CIMI\r")
     time.sleep(0.1)
@@ -122,13 +123,13 @@ def is_sim_inserted() -> bool:
         log_warning(f"Sim not inserted, ensure sim is properly inserted.")
         log_warning(f"Response : {response_1}")
         res = False
-    flush_input()
     return res
 
 
 def is_network_registered() -> bool:
     """Returns True if the simcom lte module is registred to a network, else False."""
     res = False
+    flush_input()
     flush_output()
     LTE_MODULE.write(b"AT+CREG?\r")
     time.sleep(0.1)
@@ -173,13 +174,13 @@ def is_network_registered() -> bool:
         log_warning(f"Unable to fetch network registation detail.")
         log_warning(f"Response : {response_1}")
         res = False
-    flush_input()
     return res
 
 
 def set_sms_message_format(format) -> bool:
     """Sets the sms format, 0 for PDU mode and 1 for Text mode."""
     res = False
+    flush_input()
     flush_output()
     if format == "0":
         LTE_MODULE.write("AT+CMGF=0\r")
@@ -212,12 +213,12 @@ def set_sms_message_format(format) -> bool:
             "Unsupported sms format. Supported sms format is 0 for PDU mode and 1 for Text mode."
         )
         res = False
-    flush_input()
     return res
 
 
 def set_character_set(character_set: str) -> bool:
     res = False
+    flush_input()
     flush_output()
     if character_set == "UCS2":
         LTE_MODULE.write(b'AT+CSCS="UCS2"\r')
@@ -263,13 +264,13 @@ def set_character_set(character_set: str) -> bool:
             "Unsupported character set. Supported character set are IRA, GSM and UCS2."
         )
         res = False
-    flush_input()
     return res
 
 
 def set_text_mode_parameters(is_non_english=False):
     """Set text mode parameters."""
     res = False
+    flush_input()
     flush_output()
     if is_non_english:
         LTE_MODULE.write(b"AT+CSMP=17,168,0,8\r")
@@ -297,7 +298,6 @@ def set_text_mode_parameters(is_non_english=False):
             log_warning("Text mode parameters not set.")
             log_warning(f"Response : {response}")
             res = False
-    flush_input()
     return res
 
 
@@ -306,6 +306,7 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
     phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
     sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
 
+    flush_input()
     flush_output()
     LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
     time.sleep(0.1)
@@ -335,7 +336,6 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
         log_warning(f"Message not sent.")
         log_warning(f"Response : {response}")
         res = False
-    flush_input()
     return res
 
 
