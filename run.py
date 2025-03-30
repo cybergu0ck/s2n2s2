@@ -5,5 +5,5 @@ configure_logging_system()
 
 phone_nums = ["+919632448895"]
 
-for i in range(1):
+for i in range(10):
     dispatch_sms(phone_nums[0], f"Test message {i}")
