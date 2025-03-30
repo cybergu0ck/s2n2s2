@@ -1,4 +1,7 @@
 from libs.comslib.sms import *
+from libs.loggerlib.logger import configure_logging_system
+
+configure_logging_system()
 
 phone_nums = ["+919632448895"]
 
