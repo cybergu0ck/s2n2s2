@@ -24,7 +24,7 @@ def get_service_provider() -> str:
     res = ""
     flush_output()
     LTE_MODULE.write(b"AT+CSPN?\r")
-    time.sleep(2)
+    time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check service provider: {at_command}")
     response = LTE_MODULE.readline().decode().strip()
@@ -51,7 +51,7 @@ def get_signal_strength() -> str:
     res = ""
     flush_output()
     LTE_MODULE.write(b"AT+CSQ\r")
-    time.sleep(2)
+    time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check signal strength: {at_command}")
     response = LTE_MODULE.readline().decode().strip()
@@ -87,7 +87,7 @@ def is_module_functioning() -> bool:
     flush_output()
     res = False
     LTE_MODULE.write(b"AT\r")
-    time.sleep(0.5)
+    time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check if module is functioning : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
@@ -107,7 +107,7 @@ def is_sim_inserted() -> bool:
     res = False
     flush_output()
     LTE_MODULE.write(b"AT+CIMI\r")
-    time.sleep(2)
+    time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check if sim is inserted : {at_command}")
     response_1 = LTE_MODULE.readline().decode().strip()
@@ -131,7 +131,7 @@ def is_network_registered() -> bool:
     res = False
     flush_output()
     LTE_MODULE.write(b"AT+CREG?\r")
-    time.sleep(2)
+    time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to check network registration status: {at_command}")
     response_1 = LTE_MODULE.readline().decode().strip()
@@ -183,7 +183,7 @@ def set_sms_message_format(format) -> bool:
     flush_output()
     if format == "0":
         LTE_MODULE.write("AT+CMGF=0\r")
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command to set sms message format : {at_command}")
         response = LTE_MODULE.readline().decode().strip()
@@ -196,7 +196,7 @@ def set_sms_message_format(format) -> bool:
             res = False
     elif format == "1":
         LTE_MODULE.write("AT+CMGF=1\r")
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command to set sms message format : {at_command}")
         response = LTE_MODULE.readline().decode().strip()
@@ -221,7 +221,7 @@ def set_character_set(character_set: str) -> bool:
     flush_output()
     if character_set == "UCS2":
         LTE_MODULE.write(b'AT+CSCS="UCS2"\r')
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command to set character set: {at_command}")
         response = LTE_MODULE.readline().decode().strip()
@@ -234,7 +234,7 @@ def set_character_set(character_set: str) -> bool:
             res = False
     elif character_set == "IRA":
         LTE_MODULE.write(b'AT+CSCS="IRA"\r')
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command to set character set: {at_command}")
         response = LTE_MODULE.readline().decode().strip()
@@ -247,7 +247,7 @@ def set_character_set(character_set: str) -> bool:
             res = False
     elif character_set == "GSM":
         LTE_MODULE.write(b'AT+CSCS="GSM"\r')
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command to set character set: {at_command}")
         response = LTE_MODULE.readline().decode().strip()
@@ -273,7 +273,7 @@ def set_text_mode_parameters(is_non_english=False):
     flush_output()
     if is_non_english:
         LTE_MODULE.write(b"AT+CSMP=17,168,0,8\r")
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command to set text mode parameters: {at_command}")
         response = LTE_MODULE.readline().decode().strip()
@@ -286,7 +286,7 @@ def set_text_mode_parameters(is_non_english=False):
             res = False
     else:
         LTE_MODULE.write(b"AT+CSMP=17,168,0,0\r")
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         log_debug(f"AT Command to set text mode parameters: {at_command}")
         response = LTE_MODULE.readline().decode().strip()
@@ -308,7 +308,7 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
 
     flush_output()
     LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
-    time.sleep(2)
+    time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
     log_debug(f"AT Command to send message : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
@@ -316,7 +316,7 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
         LTE_MODULE.write(
             f"{sms_message}\x1a".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
-        time.sleep(2)
+        time.sleep(0.1)
         at_command = LTE_MODULE.readline().decode().strip()
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
