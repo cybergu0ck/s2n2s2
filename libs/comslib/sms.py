@@ -344,6 +344,26 @@ def close_serial():
     LTE_MODULE.close()
 
 
+def delete_received_sms() -> bool:
+    """Deletes all received sms"""
+    res = False
+    flush_input()
+    flush_output()
+    LTE_MODULE.write(f'AT+CMGD=0,4"\r'.encode())
+    time.sleep(0.1)
+    at_command = LTE_MODULE.readline().decode().strip()
+    log_debug(f"AT Command to send message : {at_command}")
+    response = LTE_MODULE.readline().decode().strip()
+    if response == "OK":
+        log_debug(f"Response : {response}")
+        res = True
+    else:
+        log_warning("Old received messages not deleted.")
+        log_warning(f"Response : {response}")
+        res = False
+    return res
+
+
 def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     res = False
     character_set = "UCS2" if is_kannada else "IRA"
@@ -351,7 +371,8 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
 
     if is_valid_phone_number(phone_number):
         if (
-            is_module_functioning()
+            delete_received_sms()
+            and is_module_functioning()
             and is_sim_inserted()
             and is_network_registered()
             and set_character_set(character_set)
