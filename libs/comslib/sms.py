@@ -315,7 +315,7 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
     response = LTE_MODULE.readline().decode().strip()
     if response == ">":
         LTE_MODULE.write(
-            f"{sms_message}\x1A".encode()
+            f"{sms_message}\x1a".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
         time.sleep(0.1)
         at_command_1 = LTE_MODULE.readline().decode().strip()
