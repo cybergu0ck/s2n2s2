@@ -318,11 +318,11 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
             f"{sms_message}\x1a".encode()
         )  # \x1A is the ASCII code for Ctrl+Z
         time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
+        at_command_1 = LTE_MODULE.readline().decode().strip()
         response_1 = LTE_MODULE.readline().decode().strip()
         response_2 = LTE_MODULE.readline().decode().strip()
         response_3 = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command with message : {at_command}")
+        log_debug(f"AT Command with message : {at_command_1}")
         if response_1.startswith("+CMGS:") and response_3 == "OK":
             log_debug(f"Response : {response_1}")
             log_debug(f"Response : {response_2}")
