@@ -5,7 +5,7 @@ This script automates the process of accessing a Google Sheet, parsing its conte
 This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
 """
 import inspect
-from config import configure_directories
+from config import configure_directories, backup_existing_logs
 from libs.utilslib.utils import *
 from libs.loggerlib.logger import (
     configure_logging_system,
@@ -34,6 +34,7 @@ def setup_environment() -> bool:
 
     try:
         configure_directories()
+        backup_existing_logs()
         configure_logging_system()
         log_debug(f"{get_function_name(frame)} successful.")
         return True

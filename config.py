@@ -1,6 +1,7 @@
 # config.py
 import os
 import shutil
+from datetime import date
 
 DEV_MODE = False
 PI_MODE = True
@@ -46,6 +47,33 @@ def create_log_directories():
 
     if not os.path.exists(PATH_INFO_LOG_DIR):
         os.makedirs(PATH_INFO_LOG_DIR)
+
+
+def backup_files(root_path):
+    today = date.today().isoformat()
+    for filename in os.listdir(root_path):
+        file_path = os.path.join(root_path, filename)
+        if today in filename:
+            path_backup_dir = os.path.join(root_path, "backup")
+            if not os.path.exists(path_backup_dir):
+                os.makedirs(path_backup_dir)
+            path_desitnation = os.path.join(path_backup_dir, filename)
+            if os.path.exists(path_desitnation):
+                name, ext = os.path.splitext(filename)
+                version = 1
+                new_filename = f"{name}-{version}{ext}"
+                while os.path.exists(os.path.join(path_backup_dir, new_filename)):
+                    version += 1
+                    new_filename = f"{name}-{version}{ext}"
+                new_file_path = os.path.join(path_backup_dir, new_filename)
+                shutil.move(file_path, new_file_path)
+            else:
+                shutil.move(file_path, path_backup_dir)
+
+
+def backup_existing_logs():
+    backup_files(PATH_DEBUG_LOG_DIR)
+    backup_files(PATH_INFO_LOG_DIR)
 
 
 def create_temp_directory():
