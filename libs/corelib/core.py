@@ -612,6 +612,21 @@ def is_info_log_empty():
     return is_empty
 
 
+def dispatch_failure_sms_to_admins():
+    log_debug(f"Dispatching failure SMS to admins")
+    for admin in ADMINS:
+        if PI_MODE and ENABLE_SMS:
+            log_debug(f"Dispatching failure SMS to {admin.name}.")
+            message = "Automation Failure! Re-run or fallback to manual."
+            phone_number = format_phone_number(admin.phone_number)
+            success_sms = dispatch_sms(phone_number, message, False)
+            if success_sms:
+                log_debug(f"Dispatching failure SMS to {admin.name} successful.")
+            else:
+                log_warning(f"Dispatching failure SMS to {admin.name} unsuccessful.")
+                # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
+
+
 def dispatch_message_to_admins(recipients) -> bool:
     """
     Sends notification email to admins.
@@ -635,6 +650,9 @@ def dispatch_message_to_admins(recipients) -> bool:
                 body = get_email_body_for_admin(admin.name, recipients)
                 if admin.email:
                     send_email(admin.email, subject, body, attachments, cc, True)
+
+            if PI_MODE and ENABLE_SMS and not is_info_log_empty():
+                dispatch_failure_sms_to_admins()
 
         log_debug(f"{get_function_name(frame)} successful.")
         return True
