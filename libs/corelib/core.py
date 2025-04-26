@@ -53,7 +53,6 @@ class SheetsHeader(Enum):
     REGISTERED_BOOK_NUMBER = auto()
 
 
-# ANCHOR - Here
 sheetsheader_to_internalreference = {
     "Receipt Number": SheetsHeader.RECEIPT_NUMBER,
     "Receipt Date": SheetsHeader.RECEIPT_DATE,
@@ -603,6 +602,16 @@ def dispatch_messages_to_purohits(recipients) -> bool:
         return False
 
 
+def is_info_log_empty():
+    """Non-empty info log implies failure in automation"""
+    is_empty = True
+    path_to_info_logfile = get_path_to_current_session_log(False)
+    if os.path.exists(path_to_info_logfile):
+        if os.path.getsize(path_to_info_logfile) != 0:
+            is_empty = False
+    return is_empty
+
+
 def dispatch_message_to_admins(recipients) -> bool:
     """
     Sends notification email to admins.
@@ -617,10 +626,13 @@ def dispatch_message_to_admins(recipients) -> bool:
             )
             if ENABLE_EMAIL:
                 subject = "Daily Notification"
+                if is_info_log_empty():
+                    subject += " : " + " Automation Sucess"
+                else:
+                    subject += " : " + " Automation Failure"
                 attachments = get_email_attachement_for_admin()
                 cc = []
                 body = get_email_body_for_admin(admin.name, recipients)
-                # TODO- get two email body one clean one and one with message saying relay on manual as there are warning
                 if admin.email:
                     send_email(admin.email, subject, body, attachments, cc, True)
 
