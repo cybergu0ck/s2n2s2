@@ -2,15 +2,6 @@
 
 <br>
 <br>
-
-## Todo
-
-1. Add variables to enable and disable sms and email
-1. Seperate logs into info and error
-1.
-
-<br>
-<br>
 <br>
 
 # Setup
@@ -36,9 +27,3 @@
 <br>
 <br>
 <br>
-
-# AT Errors
-
-```
-+CMS ERROR: SMS size more than expected
-```
