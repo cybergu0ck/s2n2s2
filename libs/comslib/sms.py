@@ -388,9 +388,7 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     text_mode_parameters = True if is_kannada else False
 
     if is_valid_phone_number(phone_number):
-        if (
-            delete_received_sms()
-            and is_module_functioning()
+        if (is_module_functioning()
             and is_sim_inserted()
             and is_network_registered()
             and set_character_set(character_set)
