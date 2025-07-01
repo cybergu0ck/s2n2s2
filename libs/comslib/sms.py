@@ -11,6 +11,11 @@ if PI_MODE and ENABLE_SMS:
     LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 
+def close_serial():
+    """Close the serial coms"""
+    LTE_MODULE.close()
+
+
 def is_final_result(response):
     if not response:
         return False
@@ -49,11 +54,6 @@ def is_final_result(response):
     return False
 
 
-def reset_module():
-    """As per the manual, AT+CRESET resests the module. However when used in minicom it keeps on getting lot of commands about activation and deactivation after receiving OK response. This unpredictable nature will mess up is_final_result logic, hence not implementing this function."""
-    pass
-
-
 def flush_input():
     LTE_MODULE.reset_input_buffer()
 
@@ -68,63 +68,46 @@ def flush_buffers():
 
 
 def get_service_provider() -> str:
-    """Returns the service provider associated with the sim card inserted in the simcom lte module if fetchable else returns empty string."""
-    res = ""
-    flush_buffers()
-    LTE_MODULE.write(b"AT+CSPN?\r")
-    time.sleep(0.1)
-    at_command = LTE_MODULE.readline().decode().strip()
-    log_debug(f"AT Command to check service provider: {at_command}")
-    response = LTE_MODULE.readline().decode().strip()
-    # Successful output will be like '+CSPN: "airtel",0'
-    if response.startswith("+CSPN:"):
-        res = response.split(",")[0].split(":")[1]
-        log_debug(f"Response : {response}")
-    else:
-        log_warning(f"Unable to fetch service provider detail.")
-        log_warning(f"Response : {response}")
-
-    return res
+    """Not required for the current usecase."""
+    pass
 
 
 def get_phone_number() -> str:
-    """Returns the phone number associated with the sim card inserted in the simcom lte module if fetchable else returns empty string."""
-    # STUB - Add later
+    """Not required for the current usecase."""
     pass
 
 
 def get_signal_strength() -> str:
-    """Returns the signal strength detail if fetchable else returns empty string."""
-    res = ""
+    """Not required for the current usecase."""
+    pass
+
+
+def set_sms_message_format(format) -> bool:
+    """Sets the sms format, 0 for PDU mode and 1 for Text mode. Not needed for the current usecase."""
+    pass
+
+
+def reset_module():
+    """As per the manual, AT+CRESET resests the module. However when used in minicom it keeps on getting lot of commands about activation and deactivation after receiving OK response. This unpredictable nature will mess up is_final_result logic, hence not implementing this function."""
+    pass
+
+
+def delete_received_sms() -> bool:
+    """Deletes all received sms"""
+    res = False
     flush_buffers()
-    LTE_MODULE.write(b"AT+CSQ\r")
+    LTE_MODULE.write(f"AT+CMGD=0,4\r".encode())  # at+cmgd=0,4
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
-    log_debug(f"AT Command to check signal strength: {at_command}")
+    log_debug(f"AT Command to send message : {at_command}")
     response = LTE_MODULE.readline().decode().strip()
-    # Successful output will be '+CSQ: 22,99'
-    if response.startswith("+CSQ:"):
-        rssi = response.split(",")[0].split(":")[1]
-        try:
-            rssi_value = int(rssi)
-            if rssi_value > 31:
-                res = "Best signal strength."
-                log_debug(res)
-                log_debug(f"Response : {response}")
-            elif rssi_value > 15 and rssi_value < 31:
-                res = "Decent signal strength."
-                log_debug(res)
-                log_debug(f"Response : {response}")
-            else:
-                res = "Poor signal strength."
-                log_warning(res)
-                log_warning(f"Response : {response}")
-        except Exception as e:
-            log_error(f"Error in code.")
-            print(f"Exception: {e}")
+    if response == "OK":
+        log_debug(f"Response : {response}")
+        res = True
     else:
-        log_warning(f"Unable to fetch network signal strength detail.")
+        log_warning("Old received messages not deleted.")
         log_warning(f"Response : {response}")
+        res = False
     return res
 
 
@@ -216,44 +199,6 @@ def is_network_registered() -> bool:
     else:
         log_warning(f"Unable to fetch network registation detail.")
         log_warning(f"Response : {response_1}")
-        res = False
-    return res
-
-
-def set_sms_message_format(format) -> bool:
-    """Sets the sms format, 0 for PDU mode and 1 for Text mode."""
-    res = False
-    flush_buffers()
-    if format == "0":
-        LTE_MODULE.write("AT+CMGF=0\r")
-        time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to set sms message format : {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == "OK":
-            log_debug(f"Response : {response}")
-            res = True
-        else:
-            log_warning(f"SMS format not set.")
-            log_warning(f"Response : {response}")
-            res = False
-    elif format == "1":
-        LTE_MODULE.write("AT+CMGF=1\r")
-        time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to set sms message format : {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == "OK":
-            log_debug(f"Response : {response}")
-            res = True
-        else:
-            log_warning(f"SMS format not set.")
-            log_warning(f"Response : {response}")
-            res = False
-    else:
-        log_error(
-            "Unsupported sms format. Supported sms format is 0 for PDU mode and 1 for Text mode."
-        )
         res = False
     return res
 
@@ -441,30 +386,6 @@ def send_sms(phone_number, sms_message, is_hex=False):
     return res
 
 
-def close_serial():
-    """Close the serial coms"""
-    LTE_MODULE.close()
-
-
-def delete_received_sms() -> bool:
-    """Deletes all received sms"""
-    res = False
-    flush_buffers()
-    LTE_MODULE.write(f"AT+CMGD=0,4\r".encode())  # at+cmgd=0,4
-    time.sleep(0.1)
-    at_command = LTE_MODULE.readline().decode().strip()
-    log_debug(f"AT Command to send message : {at_command}")
-    response = LTE_MODULE.readline().decode().strip()
-    if response == "OK":
-        log_debug(f"Response : {response}")
-        res = True
-    else:
-        log_warning("Old received messages not deleted.")
-        log_warning(f"Response : {response}")
-        res = False
-    return res
-
-
 def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     time.sleep(2)
     flush_buffers()
@@ -496,7 +417,3 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
         )
     log_debug(f"\n\n")
     return res
-
-
-def close_serial():
-    LTE_MODULE.close()
