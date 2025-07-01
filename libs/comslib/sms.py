@@ -11,35 +11,31 @@ if PI_MODE and ENABLE_SMS:
     LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 
-
-
-
-
 def is_final_result(response):
     if not response:
         return False
 
     def starts_with(text, prefix):
         return text.startswith(prefix)
-    
+
     first_char = response[0]
     rest_of_response = response[1:]
 
-    if first_char == '+':
+    if first_char == "+":
         if starts_with(rest_of_response, "CME ERROR:"):
             return True
         if starts_with(rest_of_response, "CMS ERROR:"):
             return True
         return False
-    elif first_char == 'B':
+    elif first_char == "B":
         if rest_of_response == "USY\r\n":
             return True
         return False
-    elif first_char == 'E':
+    elif first_char == "E":
         if rest_of_response == "RROR\r\n":
             return True
         return False
-    elif first_char == 'N':
+    elif first_char == "N":
         if rest_of_response == "O ANSWER\r\n":
             return True
         if rest_of_response == "O CARRIER\r\n":
@@ -47,16 +43,15 @@ def is_final_result(response):
         if rest_of_response == "O DIALTONE\r\n":
             return True
         return False
-    elif first_char == 'O':
+    elif first_char == "O":
         if rest_of_response == "K\r\n":
             return True
     return False
 
 
-
 def reset_module():
     log_debug("Restarting the module...")
-    LTE_MODULE.write(b'AT+CFUN=1,16\r\n')
+    LTE_MODULE.write(b"AT+CFUN=1,16\r\n")
     time.sleep(5)
     log_debug("Module restarted")
 
@@ -69,11 +64,15 @@ def flush_output():
     LTE_MODULE.reset_output_buffer()
 
 
+def flush_buffers():
+    flush_input()
+    flush_output()
+
+
 def get_service_provider() -> str:
     """Returns the service provider associated with the sim card inserted in the simcom lte module if fetchable else returns empty string."""
     res = ""
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(b"AT+CSPN?\r")
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
@@ -99,8 +98,7 @@ def get_phone_number() -> str:
 def get_signal_strength() -> str:
     """Returns the signal strength detail if fetchable else returns empty string."""
     res = ""
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(b"AT+CSQ\r")
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
@@ -134,8 +132,7 @@ def get_signal_strength() -> str:
 
 def is_module_functioning() -> bool:
     """Returns True if the simcom lte module is functioning, else False."""
-    flush_input()
-    flush_output()
+    flush_buffers()
     res = False
     LTE_MODULE.write(b"AT\r")
     time.sleep(0.1)
@@ -155,8 +152,7 @@ def is_module_functioning() -> bool:
 def is_sim_inserted() -> bool:
     """Returns True if sim card is inserted in the simcom lte module, else False."""
     res = False
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(b"AT+CIMI\r")
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
@@ -179,8 +175,7 @@ def is_sim_inserted() -> bool:
 def is_network_registered() -> bool:
     """Returns True if the simcom lte module is registred to a network, else False."""
     res = False
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(b"AT+CREG?\r")
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
@@ -230,8 +225,7 @@ def is_network_registered() -> bool:
 def set_sms_message_format(format) -> bool:
     """Sets the sms format, 0 for PDU mode and 1 for Text mode."""
     res = False
-    flush_input()
-    flush_output()
+    flush_buffers()
     if format == "0":
         LTE_MODULE.write("AT+CMGF=0\r")
         time.sleep(0.1)
@@ -268,8 +262,7 @@ def set_sms_message_format(format) -> bool:
 
 def set_character_set(character_set: str) -> bool:
     res = False
-    flush_input()
-    flush_output()
+    flush_buffers()
     if character_set == "UCS2":
         LTE_MODULE.write(b'AT+CSCS="UCS2"\r')
         time.sleep(0.1)
@@ -320,8 +313,7 @@ def set_character_set(character_set: str) -> bool:
 def set_text_mode_parameters(is_non_english=False):
     """Set text mode parameters."""
     res = False
-    flush_input()
-    flush_output()
+    flush_buffers()
     if is_non_english:
         LTE_MODULE.write(b"AT+CSMP=17,168,0,8\r")
         time.sleep(0.1)
@@ -356,8 +348,7 @@ def send_sms_orig(phone_number, sms_message, is_hex=False) -> bool:
     phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
     sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
 
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
@@ -401,50 +392,50 @@ def send_sms_orig(phone_number, sms_message, is_hex=False) -> bool:
         res = False
     return res
 
+
 def send_sms_imp1(phone_number, sms_message, is_hex=False) -> bool:
     res = False
     phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
     sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
 
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
     time.sleep(1)
-    LTE_MODULE.write(f'{sms_message}\x1A'.encode())  # CTRL+Z to send
+    LTE_MODULE.write(f"{sms_message}\x1a".encode())  # CTRL+Z to send
     time.sleep(5)
 
     full_response = []
     start_time = time.time()
     while time.time() - start_time < 10:
-       if LTE_MODULE.in_waiting:
-          line = LTE_MODULE.readline().decode(errors='ignore').strip()
-          log_debug(f"Response line: {line}")
-          full_response.append(line)
-          time.sleep(0.1)
+        if LTE_MODULE.in_waiting:
+            line = LTE_MODULE.readline().decode(errors="ignore").strip()
+            log_debug(f"Response line: {line}")
+            full_response.append(line)
+            time.sleep(0.1)
 
     response_text = "\n".join(full_response)
     if "OK" in response_text or "+CMGS:" in response_text:
-       log_debug(f"Message seems to be sent.")
-       res = True
+        log_debug(f"Message seems to be sent.")
+        res = True
     else:
         log_warning(f"Message not sent.")
         log_warning(f"Response : {response_text}")
         res = False
     return res
 
+
 def send_sms(phone_number, sms_message, is_hex=False):
     print("in send_sms")
     res = False
     phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
-    sms_message  = unicode_to_hex(sms_message) if is_hex else sms_message
+    sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
 
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
-    LTE_MODULE.write(f'{sms_message}\x1A'.encode())
+    LTE_MODULE.write(f"{sms_message}\x1a".encode())
     line = LTE_MODULE.readline().decode().strip()
     print("just before while")
-    while(not is_final_result(line)):
+    while not is_final_result(line):
         line = LTE_MODULE.readline().decode().strip()
     print("after while")
     res = True
@@ -460,8 +451,7 @@ def close_serial():
 def delete_received_sms() -> bool:
     """Deletes all received sms"""
     res = False
-    flush_input()
-    flush_output()
+    flush_buffers()
     LTE_MODULE.write(f"AT+CMGD=0,4\r".encode())  # at+cmgd=0,4
     time.sleep(0.1)
     at_command = LTE_MODULE.readline().decode().strip()
@@ -479,8 +469,7 @@ def delete_received_sms() -> bool:
 
 def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     time.sleep(2)
-    flush_input()
-    flush_output()
+    flush_buffers()
     time.sleep(2)
 
     res = False
@@ -488,7 +477,8 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
     text_mode_parameters = True if is_kannada else False
 
     if is_valid_phone_number(phone_number):
-        if (is_module_functioning()
+        if (
+            is_module_functioning()
             and is_sim_inserted()
             and is_network_registered()
             and set_character_set(character_set)
