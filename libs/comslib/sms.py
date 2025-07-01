@@ -11,6 +11,56 @@ if PI_MODE and ENABLE_SMS:
     LTE_MODULE = serial.Serial(PORT, BAUD_RATE, timeout=TIME_OUT)
 
 
+
+
+
+
+def is_final_result(response):
+    if not response:
+        return False
+
+    def starts_with(text, prefix):
+        return text.startswith(prefix)
+    
+    first_char = response[0]
+    rest_of_response = response[1:]
+
+    if first_char == '+':
+        if starts_with(rest_of_response, "CME ERROR:"):
+            return True
+        if starts_with(rest_of_response, "CMS ERROR:"):
+            return True
+        return False
+    elif first_char == 'B':
+        if rest_of_response == "USY\r\n":
+            return True
+        return False
+    elif first_char == 'E':
+        if rest_of_response == "RROR\r\n":
+            return True
+        return False
+    elif first_char == 'N':
+        if rest_of_response == "O ANSWER\r\n":
+            return True
+        if rest_of_response == "O CARRIER\r\n":
+            return True
+        if rest_of_response == "O DIALTONE\r\n":
+            return True
+        return False
+    elif first_char == 'O':
+        if rest_of_response == "K\r\n":
+            return True
+    return False
+
+
+
+def reset_module():
+    log_debug("Restarting the module...")
+    LTE_MODULE.write(b'AT+CFUN=1,16\r\n')
+    time.sleep(5)
+    log_debug("Module restarted")
+
+
 def flush_input():
     LTE_MODULE.reset_input_buffer()
 
@@ -301,7 +351,7 @@ def set_text_mode_parameters(is_non_english=False):
     return res
 
 
-def send_sms(phone_number, sms_message, is_hex=False) -> bool:
+def send_sms_orig(phone_number, sms_message, is_hex=False) -> bool:
     res = False
     phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
     sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
@@ -351,6 +401,56 @@ def send_sms(phone_number, sms_message, is_hex=False) -> bool:
         res = False
     return res
 
+def send_sms_imp1(phone_number, sms_message, is_hex=False) -> bool:
+    res = False
+    phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
+    sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
+
+    flush_input()
+    flush_output()
+    LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
+    time.sleep(1)
+    LTE_MODULE.write(f'{sms_message}\x1A'.encode())  # CTRL+Z to send
+    time.sleep(5)
+
+    full_response = []
+    start_time = time.time()
+    while time.time() - start_time < 10:
+       if LTE_MODULE.in_waiting:
+          line = LTE_MODULE.readline().decode(errors='ignore').strip()
+          log_debug(f"Response line: {line}")
+          full_response.append(line)
+          time.sleep(0.1)
+
+    response_text = "\n".join(full_response)
+    if "OK" in response_text or "+CMGS:" in response_text:
+       log_debug(f"Message seems to be sent.")
+       res = True
+    else:
+        log_warning(f"Message not sent.")
+        log_warning(f"Response : {response_text}")
+        res = False
+    return res
+
+def send_sms(phone_number, sms_message, is_hex=False):
+    print("in send_sms")
+    res = False
+    phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
+    sms_message  = unicode_to_hex(sms_message) if is_hex else sms_message
+
+    flush_input()
+    flush_output()
+    LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
+    LTE_MODULE.write(f'{sms_message}\x1A'.encode())
+    line = LTE_MODULE.readline().decode().strip()
+    print("just before while")
+    while(not is_final_result(line)):
+        line = LTE_MODULE.readline().decode().strip()
+    print("after while")
+    res = True
+    log_debug(f"The output of send_sms is {res}")
+    return res
+
 
 def close_serial():
     """Close the serial coms"""
@@ -394,6 +494,7 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
             and set_character_set(character_set)
             and set_text_mode_parameters(text_mode_parameters)
         ):
+            print("just before send_sms")
             res = send_sms(phone_number, sms_message, is_kannada)
             if res:
                 log_debug(
