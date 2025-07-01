@@ -50,10 +50,8 @@ def is_final_result(response):
 
 
 def reset_module():
-    log_debug("Restarting the module...")
-    LTE_MODULE.write(b"AT+CFUN=1,16\r\n")
-    time.sleep(5)
-    log_debug("Module restarted")
+    """As per the manual, AT+CRESET resests the module. However when used in minicom it keeps on getting lot of commands about activation and deactivation after receiving OK response. This unpredictable nature will mess up is_final_result logic, hence not implementing this function."""
+    pass
 
 
 def flush_input():
