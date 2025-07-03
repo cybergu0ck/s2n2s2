@@ -101,18 +101,13 @@ def is_module_functioning() -> bool:
     result_lines = []
     LTE_MODULE.write(b"AT\r")
     line = LTE_MODULE.readline().decode().strip()
-
-    print("before first while loop")
-    print(line)
     while not is_final_response(line):
         result_lines.append(line)
         print(f"result lines = {result_lines}")
         line = LTE_MODULE.readline().decode().strip()
         print(f"inside while line: {line}")
     result_lines.append(line)
-    print("after first wile loop")
     full_result = "\n".join(result_lines)
-    print(full_result)
     if any("OK" in l for l in result_lines):
         res = True
         log_debug(f"Module is functioning.")
