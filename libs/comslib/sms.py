@@ -105,7 +105,9 @@ def is_module_functioning() -> bool:
     print(line)
     while not is_final_response(line):
         result_lines.append(line)
+        print(f"result lines = {result_lines}")
         line = LTE_MODULE.readline().decode().strip()
+        print(f"inside while line: {line}")
     result_lines.append(line)
     print("after first wile loop")
     full_result = "\n".join(result_lines)
