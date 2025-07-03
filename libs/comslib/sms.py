@@ -255,21 +255,27 @@ def send_sms(phone_number, sms_message, is_hex=False):
 
     result_lines = []
     LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
-    LTE_MODULE.write(f"{sms_message}\x1a".encode())
-    line = LTE_MODULE.readline().decode().strip()
-    print(f"first line = {line}")
-    while not is_final_response(line):
-        result_lines.append(line)
-        print(f"inside while; result lines = {result_lines}")
+    echo = LTE_MODULE.readline().decode().strip()
+    first_response = LTE_MODULE.readline().decode().strip()
+    if first_response == ">":
+        LTE_MODULE.write(f"{sms_message}\x1a".encode())
         line = LTE_MODULE.readline().decode().strip()
-        print(f"inside while; line = {line}")
-    result_lines.append(line)
-    full_result = "\n".join(result_lines)
-    if any("ERROR" in l or "+CMS ERROR" in l for l in result_lines):
+        print(f"first line = {line}")
+        while not is_final_response(line):
+            result_lines.append(line)
+            print(f"inside while; result lines = {result_lines}")
+            line = LTE_MODULE.readline().decode().strip()
+            print(f"inside while; line = {line}")
+        result_lines.append(line)
+        full_result = "\n".join(result_lines)
+        if any("ERROR" in l or "+CMS ERROR" in l for l in result_lines):
+            res = False
+            log_warning(f"Failed to send sms.")
+        else:
+            log_debug(f"Succesfull sent sms.")
+    else:
         res = False
         log_warning(f"Failed to send sms.")
-    else:
-        log_debug(f"Succesfull sent sms.")
 
     return res
 
