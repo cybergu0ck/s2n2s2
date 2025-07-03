@@ -100,7 +100,9 @@ def is_module_functioning() -> bool:
     result_lines = []
     LTE_MODULE.write(b"AT\r")
     line = LTE_MODULE.readline().decode().strip()
+
     print("before first while loop")
+    print(line)
     while not is_final_response(line):
         result_lines.append(line)
         line = LTE_MODULE.readline().decode().strip()
