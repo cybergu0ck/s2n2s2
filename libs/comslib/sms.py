@@ -20,13 +20,14 @@ def is_final_response(response):
     if not response:
         return False
 
-    if response == "OK\r\n":
+    stripped_response = response.strip()
+    if stripped_response == "OK":
         return True
-    elif response == "ERROR\r\n":
+    elif stripped_response == "ERROR":
         return True
-    elif response.startswith("+CME ERROR"):
+    elif stripped_response.startswith("+CME ERROR"):
         return True
-    elif response.startswith("+CMS ERROR"):
+    elif stripped_response.startswith("+CMS ERROR"):
         return True
     return False
 
