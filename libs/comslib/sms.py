@@ -16,41 +16,18 @@ def close_serial():
     LTE_MODULE.close()
 
 
-def is_final_result(response):
+def is_final_response(response):
     if not response:
         return False
 
-    def starts_with(text, prefix):
-        return text.startswith(prefix)
-
-    first_char = response[0]
-    rest_of_response = response[1:]
-
-    if first_char == "+":
-        if starts_with(rest_of_response, "CME ERROR:"):
-            return True
-        if starts_with(rest_of_response, "CMS ERROR:"):
-            return True
-        return False
-    elif first_char == "B":
-        if rest_of_response == "USY\r\n":
-            return True
-        return False
-    elif first_char == "E":
-        if rest_of_response == "RROR\r\n":
-            return True
-        return False
-    elif first_char == "N":
-        if rest_of_response == "O ANSWER\r\n":
-            return True
-        if rest_of_response == "O CARRIER\r\n":
-            return True
-        if rest_of_response == "O DIALTONE\r\n":
-            return True
-        return False
-    elif first_char == "O":
-        if rest_of_response == "K\r\n":
-            return True
+    if response == "OK\r\n":
+        return True
+    elif response == "ERROR\r\n":
+        return True
+    elif response.startswith("+CME ERROR"):
+        return True
+    elif response.startswith("+CMS ERROR"):
+        return True
     return False
 
 
@@ -88,7 +65,7 @@ def set_sms_message_format(format) -> bool:
 
 
 def reset_module():
-    """As per the manual, AT+CRESET resests the module. However when used in minicom it keeps on getting lot of commands about activation and deactivation after receiving OK response. This unpredictable nature will mess up is_final_result logic, hence not implementing this function."""
+    """As per the manual, AT+CRESET resests the module. However when used in minicom it keeps on getting lot of commands about activation and deactivation after receiving OK response. This unpredictable nature will mess up is_final_response logic, hence not implementing this function."""
     pass
 
 
@@ -112,277 +89,180 @@ def delete_received_sms() -> bool:
 
 
 def is_module_functioning() -> bool:
-    """Returns True if the simcom lte module is functioning, else False."""
-    flush_buffers()
+    """
+    Returns True if the simcom lte module is functioning, else False.
+    AT is the AT command with the following response
+      * OK
+    """
     res = False
+    flush_buffers()
+
+    result_lines = []
     LTE_MODULE.write(b"AT\r")
-    time.sleep(0.1)
-    at_command = LTE_MODULE.readline().decode().strip()
-    log_debug(f"AT Command to check if module is functioning : {at_command}")
-    response = LTE_MODULE.readline().decode().strip()
-    if response == "OK":
-        log_debug(f"Response : {response}")
+    line = LTE_MODULE.readline().decode().strip()
+    while not is_final_response(line):
+        result_lines.append(line)
+        line = LTE_MODULE.readline().decode().strip()
+    result_lines.append(line)
+    full_result = "\n".join(result_lines)
+    if any("OK" in l for l in result_lines):
         res = True
+        log_debug(f"Module is functioning.")
     else:
-        log_warning(f"Module is not functioning correctly, restart is suggested.")
-        log_warning(f"Response : {response}")
-        res = False
+        log_warning(f"Module is not functioning.")
+
     return res
 
 
 def is_sim_inserted() -> bool:
-    """Returns True if sim card is inserted in the simcom lte module, else False."""
-    res = False
+    """
+    Returns True if sim card is inserted in the simcom lte module, else False.
+    AT+CIMI=? is the AT command with the following responses
+      * OK
+      * ERROR
+    """
+    res = True
     flush_buffers()
-    LTE_MODULE.write(b"AT+CIMI\r")
-    time.sleep(0.1)
-    at_command = LTE_MODULE.readline().decode().strip()
-    log_debug(f"AT Command to check if sim is inserted : {at_command}")
-    response_1 = LTE_MODULE.readline().decode().strip()
-    response_2 = LTE_MODULE.readline().decode().strip()
-    response_3 = LTE_MODULE.readline().decode().strip()
-    if response_3 == "OK":
-        log_debug(f"Response : {response_1}")
-        log_debug(f"Response : {response_2}")
-        log_debug(f"Response : {response_3}")
-        res = True
-    else:
-        log_warning(f"Sim not inserted, ensure sim is properly inserted.")
-        log_warning(f"Response : {response_1}")
+
+    result_lines = []
+    LTE_MODULE.write(b"AT+CIMI=?\r")
+    line = LTE_MODULE.readline().decode().strip()
+    while not is_final_response(line):
+        result_lines.append(line)
+        line = LTE_MODULE.readline().decode().strip()
+    result_lines.append(line)
+    full_result = "\n".join(result_lines)
+    if any("ERROR" in l for l in result_lines):
         res = False
+        log_warning(f"Sim not inserted, ensure sim is properly inserted.")
+    else:
+        log_debug(f"Sim card is detected.")
+
     return res
 
 
 def is_network_registered() -> bool:
-    """Returns True if the simcom lte module is registred to a network, else False."""
-    res = False
+    """
+    Returns True if the simcom lte module is registred to a network, else False.
+
+    AT+CREG? is the AT command with the following responses.
+      * +CREG: <n>,<stat>
+
+        OK
+      * ERROR
+      * +CME ERROR: <err>
+    """
+    res = True
     flush_buffers()
+
+    result_lines = []
     LTE_MODULE.write(b"AT+CREG?\r")
-    time.sleep(0.1)
-    at_command = LTE_MODULE.readline().decode().strip()
-    log_debug(f"AT Command to check network registration status: {at_command}")
-    response_1 = LTE_MODULE.readline().decode().strip()
-    response_2 = LTE_MODULE.readline().decode().strip()
-    response_3 = LTE_MODULE.readline().decode().strip()
-    if response_1.startswith("+CREG:") and response_3 == "OK":
-        status = response_1.split(",")[1]
-        if status == "0":
-            log_warning(
-                f" Not registered,ME is not currently searching a new operator to register to."
-            )
-            log_warning(f"Response : {response_1}")
-            res = False
-        elif status == "1":
-            log_debug(f"Registered to home network.")
-            log_debug(f"Response : {response_1}")
-            res = True
-        elif status == "2":
-            log_warning(f"Registered to home network.")
-            log_warning(f"Response : {response_1}")
-            res = False
-        elif status == "3":
-            log_warning(f"Registration denied.")
-            log_warning(f"Response : {response_1}")
-            res = False
-        elif status == "4":
-            log_warning(f"Unknown response while fetching network registration.")
-            log_warning(f"Response : {response_1}")
-            res = False
-        elif status == "5":
-            log_warning(f"Registered, roaming.")
-            log_warning(f"Response : {response_1}")
-            res = True
-        elif status == "6":
-            log_warning(f"Registered, sms only.")
-            log_warning(f"Response : {response_1}")
-            res = True
-    else:
-        log_warning(f"Unable to fetch network registation detail.")
-        log_warning(f"Response : {response_1}")
+    line = LTE_MODULE.readline().decode().strip()
+    while not is_final_response(line):
+        result_lines.append(line)
+        line = LTE_MODULE.readline().decode().strip()
+    result_lines.append(line)
+    full_result = "\n".join(result_lines)
+    if any("ERROR" in l or "+CME ERROR" in l for l in result_lines):
         res = False
+        log_warning(f"Sim not registered to network.")
+    else:
+        log_debug(f"Sim is registered to network.")
+
     return res
 
 
 def set_character_set(character_set: str) -> bool:
-    res = False
+    """
+    Set the character set to be used by sim module.
+    AT+CSCS=<chset> is the AT command with the following responses.
+      * OK
+      * ERROR
+    """
+    res = True
     flush_buffers()
-    if character_set == "UCS2":
-        LTE_MODULE.write(b'AT+CSCS="UCS2"\r')
-        time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to set character set: {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == "OK":
-            log_debug(f"Response : {response}")
-            res = True
-        else:
-            log_warning("Character set not set.")
-            log_warning(f"Response : {response}")
-            res = False
-    elif character_set == "IRA":
-        LTE_MODULE.write(b'AT+CSCS="IRA"\r')
-        time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to set character set: {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == "OK":
-            log_debug(f"Response : {response}")
-            res = True
-        else:
-            log_warning("Character set not set.")
-            log_warning(f"Response : {response}")
-            res = False
-    elif character_set == "GSM":
-        LTE_MODULE.write(b'AT+CSCS="GSM"\r')
-        time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to set character set: {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == "OK":
-            log_debug(f"Response : {response}")
-            res = True
-        else:
-            log_warning("Character set not set.")
-            log_warning(f"Response : {response}")
-            res = False
-    else:
-        log_error(
-            "Unsupported character set. Supported character set are IRA, GSM and UCS2."
-        )
+
+    result_lines = []
+    LTE_MODULE.write(f'AT+CSCS="{character_set}"\r'.encode())
+    line = LTE_MODULE.readline().decode().strip()
+    while not is_final_response(line):
+        result_lines.append(line)
+        line = LTE_MODULE.readline().decode().strip()
+    result_lines.append(line)
+    full_result = "\n".join(result_lines)
+    if any("ERROR" in l or "+CME ERROR" in l for l in result_lines):
         res = False
+        log_warning(f"Failed to set character set for the sim module.")
+    else:
+        log_debug(f"Succesfull in setting character set.")
+
     return res
 
 
 def set_text_mode_parameters(is_non_english=False):
-    """Set text mode parameters."""
-    res = False
+    """
+    Set text mode parameters.
+
+    AT+CSMP=<fo>[,<vp>[,<pid>[,<dcs>]]] is the AT command with the following responses
+      * OK
+      * ERROR
+    """
+    res = True
     flush_buffers()
-    if is_non_english:
-        LTE_MODULE.write(b"AT+CSMP=17,168,0,8\r")
-        time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to set text mode parameters: {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == "OK":
-            log_debug(f"Response : {response}")
-            res = True
-        else:
-            log_warning("Text mode parameters not set.")
-            log_warning(f"Response : {response}")
-            res = False
-    else:
-        LTE_MODULE.write(b"AT+CSMP=17,168,0,0\r")
-        time.sleep(0.1)
-        at_command = LTE_MODULE.readline().decode().strip()
-        log_debug(f"AT Command to set text mode parameters: {at_command}")
-        response = LTE_MODULE.readline().decode().strip()
-        if response == "OK":
-            log_debug(f"Response : {response}")
-            res = True
-        else:
-            log_warning("Text mode parameters not set.")
-            log_warning(f"Response : {response}")
-            res = False
-    return res
 
-
-def send_sms_orig(phone_number, sms_message, is_hex=False) -> bool:
-    res = False
-    phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
-    sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
-
-    flush_buffers()
-    LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
-    time.sleep(0.1)
-    at_command = LTE_MODULE.readline().decode().strip()
-    log_debug(f"AT Command to send message : {at_command}")
-    response = LTE_MODULE.readline().decode().strip()
-    if response == ">":
-        LTE_MODULE.write(
-            f"{sms_message}\x1a".encode()
-        )  # \x1A is the ASCII code for Ctrl+Z
-        time.sleep(0.1)
-        at_command_1 = LTE_MODULE.readline().decode().strip()
-        response_1 = LTE_MODULE.readline().decode().strip()
-        response_2 = LTE_MODULE.readline().decode().strip()
-        response_3 = LTE_MODULE.readline().decode().strip()
-        time.sleep(0.1)
-        log_debug(f"AT Command with message : {at_command_1}")
-        if (
-            not any(
-                resp.startswith("+CMS ERROR:")
-                for resp in (response_1, response_2, response_3)
-            )
-        ) and (
-            any(
-                resp.startswith("+CMGS:")
-                for resp in (response_1, response_2, response_3)
-            )
-        ):
-            log_debug(f"Response : {response_1}")
-            log_debug(f"Response : {response_2}")
-            log_debug(f"Response : {response_3}")
-            res = True
-        else:
-            log_warning(f"Message not sent.")
-            log_warning(f"Response : {response_1}")
-            log_warning(f"Response : {response_2}")
-            log_warning(f"Response : {response_3}")
-            res = False
-    else:
-        log_warning(f"Message not sent.")
-        log_warning(f"Response : {response}")
+    result_lines = []
+    cmd = "AT+CSMP=17,168,0,8" if is_non_english else "AT+CSMP=17,168,0,0"
+    LTE_MODULE.write((cmd + "\r").encode())
+    line = LTE_MODULE.readline().decode().strip()
+    while not is_final_response(line):
+        result_lines.append(line)
+        line = LTE_MODULE.readline().decode().strip()
+    result_lines.append(line)
+    full_result = "\n".join(result_lines)
+    if any("ERROR" in l or "+CME ERROR" in l for l in result_lines):
         res = False
-    return res
-
-
-def send_sms_imp1(phone_number, sms_message, is_hex=False) -> bool:
-    res = False
-    phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
-    sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
-
-    flush_buffers()
-    LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
-    time.sleep(1)
-    LTE_MODULE.write(f"{sms_message}\x1a".encode())  # CTRL+Z to send
-    time.sleep(5)
-
-    full_response = []
-    start_time = time.time()
-    while time.time() - start_time < 10:
-        if LTE_MODULE.in_waiting:
-            line = LTE_MODULE.readline().decode(errors="ignore").strip()
-            log_debug(f"Response line: {line}")
-            full_response.append(line)
-            time.sleep(0.1)
-
-    response_text = "\n".join(full_response)
-    if "OK" in response_text or "+CMGS:" in response_text:
-        log_debug(f"Message seems to be sent.")
-        res = True
+        log_warning(f"Failed to set text mode parameters for the sim module.")
     else:
-        log_warning(f"Message not sent.")
-        log_warning(f"Response : {response_text}")
-        res = False
+        log_debug(f"Succesfull in setting text mode parameters.")
+
     return res
 
 
 def send_sms(phone_number, sms_message, is_hex=False):
-    print("in send_sms")
-    res = False
+    """
+    Send sms to the network.
+    AT+CMGS=<da>[,<toda>] is the AT command with the following responses,
+      * If sending successfully:
+        * +CMGS: <mr>
+
+          OK
+      * If cancel sending:
+        * OK
+      * If sending fails:
+        * ERROR
+      * If sending fails:
+        * +CMS ERROR: <err>
+    """
+    res = True
+    flush_buffers()
     phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
     sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
 
-    flush_buffers()
+    result_lines = []
     LTE_MODULE.write(f'AT+CMGS="{phone_number}"\r'.encode())
     LTE_MODULE.write(f"{sms_message}\x1a".encode())
     line = LTE_MODULE.readline().decode().strip()
-    print("just before while")
-    while not is_final_result(line):
+    while not is_final_response(line):
+        result_lines.append(line)
         line = LTE_MODULE.readline().decode().strip()
-    print("after while")
-    res = True
-    log_debug(f"The output of send_sms is {res}")
+    result_lines.append(line)
+    full_result = "\n".join(result_lines)
+    if any("ERROR" in l or "+CMS ERROR" in l for l in result_lines):
+        res = False
+        log_warning(f"Failed to send sms.")
+    else:
+        log_debug(f"Succesfull sent sms.")
+
     return res
 
 
@@ -403,7 +283,6 @@ def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
             and set_character_set(character_set)
             and set_text_mode_parameters(text_mode_parameters)
         ):
-            print("just before send_sms")
             res = send_sms(phone_number, sms_message, is_kannada)
             if res:
                 log_debug(
