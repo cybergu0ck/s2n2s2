@@ -325,7 +325,7 @@ def get_simple_kannada_message():
 
 
 def get_simple_english_message():
-    return "Namaste, your Shashwatha Pooja Seva to Shri Shankara Narayana Swamy was performed today...Regards Temple Trustee, Naloor, Kadaba"
+    return "Namaste, Today is your sacred Shashwatha Pooja Seva to Shri Shankara Narayana. We pray for your well being - Naloor, Kadaba"
 
 
 def get_message_for_purohit(recipients):
