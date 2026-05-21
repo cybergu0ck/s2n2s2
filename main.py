@@ -40,6 +40,5 @@ if __name__ == "__main__":
     if not notify_admins(is_success):
         log_warning("Failed to notify certain admins")
 
-    log_debug("Notified all admins.")
     perform_cleanup()
     log_debug("End of Script.\n\n\n")
