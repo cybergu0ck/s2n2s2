@@ -402,7 +402,9 @@ def dispatch_reminders(recipients) -> bool:
                 subject = "Daily Reminder"
                 attachments = []
                 cc = [admin.email for admin in ADMINS]  # NOTE - Admins are CCd
-                body = get_email_body_for_purohit(purohit.name, recipients)
+                body = get_email_body_for_purohit(
+                    purohit.name, recipients, get_header_row()
+                )
                 if purohit.email:
                     if send_email(purohit.email, subject, body, attachments, cc, True):
                         log_debug(
@@ -526,10 +528,12 @@ def notify_admins(is_success) -> bool:
                         subject += " : " + " Automation Sucess with certain warnings."
                 else:
                     subject += " : " + " Automation Failure"
-                attachments = get_email_attachement_for_admin()
+                attachments = get_email_attachement_for_admin(get_image_name())
                 cc = []
                 recipients = get_todays_recipients()
-                body = get_email_body_for_admin(admin.name, recipients)
+                body = get_email_body_for_admin(
+                    admin.name, recipients, get_header_row()
+                )
                 if admin.email:
                     if send_email(admin.email, subject, body, attachments, cc, True):
                         log_debug(

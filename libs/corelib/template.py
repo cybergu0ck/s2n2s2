@@ -1,6 +1,5 @@
 from . import *
 import inspect
-from core import get_header_row, get_image_name
 
 
 def get_simple_kannada_message():
@@ -19,7 +18,7 @@ def get_email_body_for_recipient(title, name):
     return f"""Namasthe dear devotee, {title} {name}. Greetings of the day from Nalur Shankara Narayana Devasthana. Your Shashwatha Pooja Seva is performed today. May the lord Shankara Narayana bless you and your family members. We look forward for your continuous support. \n\n - Temple Committee"""
 
 
-def get_email_body_for_purohit(name, recipients):
+def get_email_body_for_purohit(name, recipients, headers):
     html = """\
     <html>
      <head>
@@ -53,7 +52,7 @@ def get_email_body_for_purohit(name, recipients):
             "Nakshatra",
             "Rashi",
         ]
-        html += generate_custom_html_table(recipients, get_header_row(), include)
+        html += generate_custom_html_table(recipients, headers, include)
         html += """
         <div class="spacer"></div> 
         """
@@ -68,7 +67,7 @@ def get_email_body_for_purohit(name, recipients):
     return html
 
 
-def get_email_body_for_admin(name, recipients):
+def get_email_body_for_admin(name, recipients, headers):
     html = """\
     <html>
      <head>
@@ -95,7 +94,7 @@ def get_email_body_for_admin(name, recipients):
         html += f"""
         <p>The following is the list of recipients for today's Shashwatha Pooja Seva, dated {TODAY}.</p>
         """
-        html += generate_html_table(recipients, get_header_row())
+        html += generate_html_table(recipients, headers)
         html += """
         <div class="spacer"></div> 
         """
@@ -125,11 +124,10 @@ def get_email_attachement_for_recipient():
     return res
 
 
-def get_email_attachement_for_admin():
+def get_email_attachement_for_admin(image_name):
     frame = inspect.currentframe()
     res = []
     try:
-        image_name = get_image_name()
         path_to_img = os.path.join(PATH_TEMP_DIR, image_name)
         if os.path.exists(path_to_img):
             recipients_image = {}
