@@ -37,7 +37,7 @@ WORKSHEET_NAME_DEV_PUROHITS = "dev-purohits"
 
 def create_log_directories():
     """
-    Create directories to store the generated log files if not created already.
+    Create directories to store the generated log files.
     """
     if not os.path.exists(PATH_LOG_DIR):
         os.makedirs(PATH_LOG_DIR)
@@ -50,6 +50,9 @@ def create_log_directories():
 
 
 def backup_files(root_path):
+    """
+    Move files containing same name to backup directory. 
+    """
     today = date.today().isoformat()
     for filename in os.listdir(root_path):
         file_path = os.path.join(root_path, filename)
@@ -72,13 +75,17 @@ def backup_files(root_path):
 
 
 def backup_existing_logs():
+    """
+    Move debug and info logs with same name to backup directory.
+    """
     backup_files(PATH_DEBUG_LOG_DIR)
     backup_files(PATH_INFO_LOG_DIR)
 
 
 def create_temp_directory():
     """
-    Create a fresh temp directory by destroying if already present.
+    Create a a temporary directory to store temporary data.
+    Certian data like image for email attachement will be stored in this directory.
     """
     if os.path.exists(PATH_TEMP_DIR):
         shutil.rmtree(PATH_TEMP_DIR)
