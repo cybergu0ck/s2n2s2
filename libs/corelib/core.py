@@ -301,6 +301,16 @@ def save_recipients(recipients) -> bool:
         return False
 
 
+def is_info_log_empty():
+    """Non-empty info log implies failure in automation"""
+    is_empty = True
+    path_to_info_logfile = get_path_to_current_session_log(False)
+    if os.path.exists(path_to_info_logfile):
+        if os.path.getsize(path_to_info_logfile) != 0:
+            is_empty = False
+    return is_empty
+
+
 def dispatch_messages_to_recipients(recipients) -> bool:
     """
     Sends SMS and Email to the list of recipients.

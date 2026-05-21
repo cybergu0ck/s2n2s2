@@ -1,5 +1,4 @@
 from . import *
-from libs.loggerlib.logger import get_path_to_current_session_log
 from datetime import datetime
 import os
 import re
@@ -29,16 +28,6 @@ def is_valid_date(value):
         return True
     except (ValueError, TypeError):
         return False
-
-
-def is_info_log_empty():
-    """Non-empty info log implies failure in automation"""
-    is_empty = True
-    path_to_info_logfile = get_path_to_current_session_log(False)
-    if os.path.exists(path_to_info_logfile):
-        if os.path.getsize(path_to_info_logfile) != 0:
-            is_empty = False
-    return is_empty
 
 
 def generate_custom_html_table(two_d_array, headers, include):
