@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-This script automates the process of accessing a Google Sheet, parsing its contents, and sending messages to recipients based on the data retrieved. It is designed to run on a Raspberry Pi and is to be scheduled for periodic execution.
+This script automates the process of accessing a Google Sheet, parsing its contents, and sending messages to purohits and recipients based on the data retrieved. It is designed to run on a Raspberry Pi and is to be scheduled for periodic execution.
 
 This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
 """
@@ -17,6 +17,7 @@ from libs.corelib.core import (
     prepare_data,
     get_todays_recipients,
     save_recipients,
+     dispatch_messages_to_purohits,
     dispatch_messages_to_recipients,
     perform_cleanup,
     dispatch_message_to_admins,
@@ -31,7 +32,6 @@ def setup_environment() -> bool:
     Performs configurations and sets up the environment.
     """
     frame = inspect.currentframe()
-
     try:
         configure_directories()
         backup_existing_logs()
@@ -44,22 +44,42 @@ def setup_environment() -> bool:
         return False
 
 
-def main():
-    """Main function to execute the daily messaging script."""
+def main() -> bool:
+    """Execute the daily messaging workflow."""
     log_debug("Script started.")
-    if setup_environment():
-        if prepare_data():
-            global RECIPIENTS
-            RECIPIENTS = get_todays_recipients()
-            if save_recipients(RECIPIENTS):
-                if dispatch_messages_to_recipients(RECIPIENTS):
-                    log_debug("Script completed successfully.")
-                    return
-    log_error("Script completed unsuccessfully.")
+
+    if not setup_environment():
+        log_error("Environment setup failed.")
+        return False
+
+    if not prepare_data():
+        log_error("Data preparation failed.")
+        return False
+
+    recipients = get_todays_recipients()
+    if not save_recipients(recipients):
+        log_error("Failed to save recipients.")
+        return False
+
+    global RECIPIENTS
+    RECIPIENTS = recipients
+
+    if dispatch_messages_to_purohits(recipients):
+        log_info("Reminders sent successfully.")
+    else:
+        log_error("Failed to send reminders to purohits.")
+
+    if dispatch_messages_to_recipients(recipients):
+        log_info("Messages sent to recipients successfully.")
+        return True
+
+    log_error("Failed to send messages to recipients.")
+    return False
 
 
 if __name__ == "__main__":
-    main()
+    success = main()
     dispatch_message_to_admins(RECIPIENTS)
     perform_cleanup()
+    log_debug(f"Script ended. success={success}")
     log_debug("\n\n\n")
