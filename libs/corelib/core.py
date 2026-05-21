@@ -1,7 +1,7 @@
 from . import *
 from libs.comslib.email import send_email
 from libs.comslib.sms import dispatch_sms, close_serial
-from template import *
+from .template import *
 import gspread
 import time
 import inspect
