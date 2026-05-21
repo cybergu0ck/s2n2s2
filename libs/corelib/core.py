@@ -17,6 +17,7 @@ INTERNALHEADER_TO_COLUMNID = {}
 IMAGE_NAME = "recipients-list.png"
 
 
+# TODO - Add a class that validates if the sheet is messed, if the header names are messed, this file and the email to purohit will be messed.
 class Member:
     def __init__(self, name, email, phone_number):
         self.name = name
@@ -189,23 +190,6 @@ def populate_purohit_list() -> bool:
         # STUB - log the list of admins here
         log_debug(f"{get_function_name(frame)} successful.")
         return True
-
-
-def fetch_data() -> bool:
-    """
-    Loads the google sheet and initialises the header_to_column mapping.
-    """
-    frame = inspect.currentframe()
-
-    if load_google_sheet():
-        if validate_admin_worksheet_header_integrity():
-            if populate_admin_list() and populate_purohit_list():
-                if populate_header_to_column_mapping():
-                    log_debug(f"{get_function_name(frame)} successful.")
-                    return True
-
-    log_error(f"{get_function_name(frame)} unsuccessful.")
-    return False
 
 
 def append_empty_values(recipient, diff):
@@ -650,4 +634,25 @@ def perform_cleanup():
     log_debug(f"{get_function_name(frame)} successful.")
 
 
-# TODO - Add a class that validates if the sheet is messed, if the header names are messed, this file and the email to purohit will be messed.
+def fetch_data() -> bool:
+    """
+    Loads the google sheet and initialises the header_to_column mapping.
+    """
+
+    if not load_google_sheet():
+        log_warning("Failed to load data from google sheet.")
+        return False
+
+    if not validate_admin_worksheet_header_integrity():
+        log_warning("Failed to validate worksheet header integrity.")
+        return False
+
+    if (not populate_admin_list) or (not populate_purohit_list()):
+        log_warning("Failed to populate either admin or purohit list.")
+        return False
+
+    if not populate_header_to_column_mapping():
+        log_warning("Failed to map headers to columns.")
+        return False
+
+    return True

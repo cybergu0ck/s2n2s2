@@ -53,7 +53,7 @@ def main() -> bool:
         return False
 
     if not fetch_data():
-        log_error("Data preparation failed.")
+        log_error("Failed to fetch data.")
         return False
 
     recipients = get_todays_recipients()
