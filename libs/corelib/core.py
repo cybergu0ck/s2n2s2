@@ -553,8 +553,8 @@ def notify_admins(is_success) -> bool:
 
     except Exception as e:
         frame = inspect.currentframe()
-        log_error(f"Exception thrown in {get_function_name(frame)} function.")
-        log_error(f"Exception : {e}")
+        log_warning(f"Exception thrown in {get_function_name(frame)} function.")
+        log_warning(f"Exception : {e}")
         return False
 
 
