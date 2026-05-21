@@ -8,7 +8,6 @@ from enum import Enum, auto
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 WORKSHEET = None
 ADMIN_WORKSHEET = None
 PUROHIT_WORKSHEET = None
@@ -192,7 +191,7 @@ def populate_purohit_list() -> bool:
         return True
 
 
-def prepare_data() -> bool:
+def fetch_data() -> bool:
     """
     Loads the google sheet and initialises the header_to_column mapping.
     """

@@ -4,6 +4,7 @@ This script automates the process of accessing a Google Sheet, parsing its conte
 
 This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
 """
+
 import inspect
 from config import configure_directories, backup_existing_logs
 from libs.utilslib.utils import *
@@ -14,15 +15,14 @@ from libs.loggerlib.logger import (
     log_debug,
 )
 from libs.corelib.core import (
-    prepare_data,
+    fetch_data,
     get_todays_recipients,
     save_recipients,
-     dispatch_messages_to_purohits,
+    dispatch_messages_to_purohits,
     dispatch_messages_to_recipients,
     perform_cleanup,
     dispatch_message_to_admins,
 )
-
 
 RECIPIENTS = None
 
@@ -52,7 +52,7 @@ def main() -> bool:
         log_error("Environment setup failed.")
         return False
 
-    if not prepare_data():
+    if not fetch_data():
         log_error("Data preparation failed.")
         return False
 

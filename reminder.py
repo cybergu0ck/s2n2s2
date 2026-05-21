@@ -4,6 +4,7 @@ This script automates the process of accessing a Google Sheet, parsing its conte
 
 This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
 """
+
 import inspect
 from config import configure_directories
 from libs.utilslib.utils import *
@@ -14,14 +15,13 @@ from libs.loggerlib.logger import (
     log_debug,
 )
 from libs.corelib.core import (
-    prepare_data,
+    fetch_data,
     get_todays_recipients,
     save_recipients,
     dispatch_messages_to_purohits,
     perform_cleanup,
     dispatch_message_to_admins,
 )
-
 
 RECIPIENTS = None
 
@@ -47,7 +47,7 @@ def main():
     """Main function to execute the daily messaging script."""
     log_debug("Script started.")
     if setup_environment():
-        if prepare_data():
+        if fetch_data():
             global RECIPIENTS
             RECIPIENTS = get_todays_recipients()
             if save_recipients(RECIPIENTS):
