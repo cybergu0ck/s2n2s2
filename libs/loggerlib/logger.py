@@ -6,7 +6,6 @@ LOGGER = logging.getLogger(__name__)
 PATH_SESSION_DEBUG_LOG = ""
 PATH_SESSION_INFO_LOG = ""
 
-
 def get_logfile_path(is_debug):
     path = PATH_DEBUG_LOG_DIR if is_debug else PATH_INFO_LOG_DIR
     file_extension = LOG_FILE_EXTENSION
@@ -16,7 +15,6 @@ def get_logfile_path(is_debug):
         else os.path.join(path, f"info-{TODAY_FOR_LOG}{file_extension}")
     )
     return path_to_log_file
-
 
 def configure_logging_system():
     """
@@ -49,22 +47,17 @@ def configure_logging_system():
 
     LOGGER.debug("Logger system configured successfully")
 
-
 def log_warning(warning):
     LOGGER.warning(warning)
-
 
 def log_error(error):
     LOGGER.error(error)
 
-
 def log_info(info):
     LOGGER.info(info)
 
-
 def log_debug(info):
     LOGGER.debug(info)
-
 
 def get_path_to_current_session_log(is_debug=False):
     if is_debug:
