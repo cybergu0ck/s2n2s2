@@ -238,16 +238,18 @@ def get_todays_recipients() -> list:
 
 
 def log_todays_recipients(recipients):
-    info = "List of recipients : "
+    log_debug("\n\n")
     if len(recipients) == 0:
-        info += f"Empty."
+        info = "List of recipients : Empty"
+        log_debug(info)
     else:
+        log_debug("List of recipients :")
         for index, recipient in enumerate(recipients, start=1):
             name = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1
             ]
-            info += f"{index}.{name}, "
-    log_debug(info)
+            log_debug(f"{index}.{name}")
+    log_debug("\n\n")
 
 
 def get_header_row():
@@ -331,7 +333,7 @@ def dispatch_messages_to_recipients(recipients) -> bool:
             language = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_LANGUAGE] - 1
             ]
-            log_debug("\n\n")
+            log_debug("\n")
             log_debug(
                 f"Recipient, Name: {title} {name}, Phone : {phone_num}, Email : {email_address}, Gotra : {gotra}, Rashi : {rashi}, Nakshatra : {nakshatra}."
             )
@@ -385,7 +387,9 @@ def dispatch_reminders(recipients) -> bool:
     Send message to purohits and admins
     """
     try:
+        log_debug("\n")
         for purohit in PUROHITS:
+            log_debug("\n")
             if PI_MODE and ENABLE_SMS:
                 message = get_message_for_purohit(recipients)
                 phone_number = format_phone_number(purohit.phone_number)
@@ -428,7 +432,9 @@ def dispatch_reminders(recipients) -> bool:
                         f"Failed to send message to {admin.name} with phone number {phone_number}."
                     )
                     # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
-        log_debug("Successfully dispatched necessary reminders.")
+        log_debug(
+            "Successfully dispatched necessary reminders to purohits and admins.\n\n"
+        )
         return True
 
     except Exception as e:
