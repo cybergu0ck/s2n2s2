@@ -95,7 +95,6 @@ def is_module_functioning() -> bool:
     AT is the AT command with the following response
       * OK
     """
-    res = False
     flush_buffers()
 
     result_lines = []
@@ -107,12 +106,11 @@ def is_module_functioning() -> bool:
     result_lines.append(line)
     full_result = "\n".join(result_lines)
     if any("OK" in l for l in result_lines):
-        res = True
-        log_debug(f"Module is functioning.")
+        log_debug("SIM module is functioning.")
+        return True
     else:
-        log_warning(f"Module is not functioning.")
-
-    return res
+        log_warning("SIM Module is not functioning.")
+        return False
 
 
 def is_sim_inserted() -> bool:
@@ -122,7 +120,6 @@ def is_sim_inserted() -> bool:
       * OK
       * ERROR
     """
-    res = True
     flush_buffers()
 
     result_lines = []
@@ -134,12 +131,11 @@ def is_sim_inserted() -> bool:
     result_lines.append(line)
     full_result = "\n".join(result_lines)
     if any("ERROR" in l for l in result_lines):
-        res = False
-        log_warning(f"Sim not inserted, ensure sim is properly inserted.")
+        log_warning("SIM module unable to detect the SIM.")
+        return False
     else:
-        log_debug(f"Sim card is detected.")
-
-    return res
+        log_debug("SIM module detected the SIM.")
+        return True
 
 
 def is_network_registered() -> bool:
@@ -153,9 +149,7 @@ def is_network_registered() -> bool:
       * ERROR
       * +CME ERROR: <err>
     """
-    res = True
     flush_buffers()
-
     result_lines = []
     LTE_MODULE.write(b"AT+CREG?\r")
     line = LTE_MODULE.readline().decode().strip()
@@ -165,12 +159,11 @@ def is_network_registered() -> bool:
     result_lines.append(line)
     full_result = "\n".join(result_lines)
     if any("ERROR" in l or "+CME ERROR" in l for l in result_lines):
-        res = False
         log_warning(f"Sim not registered to network.")
+        return False
     else:
-        log_debug(f"Sim is registered to network.")
-
-    return res
+        log_debug("SIM is registered to network.")
+        return True
 
 
 def set_character_set(character_set: str) -> bool:
@@ -180,7 +173,6 @@ def set_character_set(character_set: str) -> bool:
       * OK
       * ERROR
     """
-    res = True
     flush_buffers()
 
     result_lines = []
@@ -192,12 +184,11 @@ def set_character_set(character_set: str) -> bool:
     result_lines.append(line)
     full_result = "\n".join(result_lines)
     if any("ERROR" in l or "+CME ERROR" in l for l in result_lines):
-        res = False
         log_warning(f"Failed to set character set for the sim module.")
+        return False
     else:
-        log_debug(f"Succesfull in setting character set.")
-
-    return res
+        log_debug("Succesfully set character set.")
+        return True
 
 
 def set_text_mode_parameters(is_non_english=False):
@@ -208,7 +199,6 @@ def set_text_mode_parameters(is_non_english=False):
       * OK
       * ERROR
     """
-    res = True
     flush_buffers()
 
     result_lines = []
@@ -221,12 +211,11 @@ def set_text_mode_parameters(is_non_english=False):
     result_lines.append(line)
     full_result = "\n".join(result_lines)
     if any("ERROR" in l or "+CME ERROR" in l for l in result_lines):
-        res = False
         log_warning(f"Failed to set text mode parameters for the sim module.")
+        return False
     else:
-        log_debug(f"Succesfull in setting text mode parameters.")
-
-    return res
+        log_debug("Succesfully set text mode parameters.")
+        return True
 
 
 def send_sms(phone_number, sms_message, is_hex=False):
@@ -244,7 +233,6 @@ def send_sms(phone_number, sms_message, is_hex=False):
       * If sending fails:
         * +CMS ERROR: <err>
     """
-    res = True
     flush_buffers()
     phone_number = unicode_to_hex(phone_number) if is_hex else phone_number
     sms_message = unicode_to_hex(sms_message) if is_hex else sms_message
@@ -262,44 +250,36 @@ def send_sms(phone_number, sms_message, is_hex=False):
             result_lines.append(line)
         full_result = "\n".join(result_lines)
         if any("ERROR" in l or "+CMS ERROR" in l for l in result_lines):
-            res = False
-            log_warning(f"Failed to send sms.")
+            log_warning("SIM module failed to send sms.")
+            return False
         else:
-            log_debug(f"Succesfull sent sms.")
+            log_debug("SIM module successfully sent SMS.")
+            return True
     else:
-        res = False
-        log_warning(f"Failed to send sms.")
-
-    return res
+        log_warning("SIM module failed to send sms.")
+        return False
 
 
 def dispatch_sms(phone_number, sms_message, is_kannada=False) -> bool:
+    res = False
     time.sleep(2)
     flush_buffers()
     time.sleep(2)
 
-    res = False
-    character_set = "UCS2" if is_kannada else "IRA"
-    text_mode_parameters = True if is_kannada else False
-
     if is_valid_phone_number(phone_number):
-        if (
+        character_set = "UCS2" if is_kannada else "IRA"
+        text_mode_parameters = True if is_kannada else False
+        is_success = (
             is_module_functioning()
             and is_sim_inserted()
             and is_network_registered()
             and set_character_set(character_set)
             and set_text_mode_parameters(text_mode_parameters)
-        ):
-            res = send_sms(phone_number, sms_message, is_kannada)
-            if res:
-                log_debug(
-                    f"SMS to <{phone_number}> successful using {'kannada' if is_kannada else 'english'}."
-                )
-            else:
-                log_warning(f"SMS to <{phone_number}> unsuccessful.")
-    else:
-        log_warning(
-            f"SMS to <{phone_number}> unsuccessful because of Invalid phone number."
         )
-    log_debug(f"\n\n")
+
+        if is_success:
+            res = send_sms(phone_number, sms_message, is_kannada)
+
+    else:
+        log_warning(f"{phone_number} seems to be an invalid phone number.")
     return res

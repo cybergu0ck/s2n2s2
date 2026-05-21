@@ -54,8 +54,7 @@ def send_email(
             )  # TODO - See if I can get any confirmation on successful email dispatch here
             server.quit()
 
-        log_debug(f"Email to <{email_address}> successful.")
         return True
     else:
-        log_warning(f"<{email_address}> is an invalid email address.")
+        log_info(f"{email_address} seems to be an invalid email.")
         return False

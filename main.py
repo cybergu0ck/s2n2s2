@@ -1,85 +1,45 @@
 #!/usr/bin/env python3
 """
-This script automates the process of accessing a Google Sheet, parsing its contents, and sending messages to purohits and recipients based on the data retrieved. It is designed to run on a Raspberry Pi and is to be scheduled for periodic execution.
+Daily Messaging Automation Workflow
 
-This script is intended to be executed in a controlled environment where it can reliably access external resources such as Google Sheets  and email services.
+This module orchestrates the automated retrieval, processing, and dispatch of
+scheduled communications to purohits, admins and recipients based on Google Sheets data.
+Designed for headless deployment, it executes as a periodic cron job.
 """
 
-import inspect
-from config import configure_directories, backup_existing_logs
 from libs.utilslib.utils import *
 from libs.loggerlib.logger import (
-    configure_logging_system,
-    log_info,
-    log_error,
     log_debug,
+    log_info,
+    log_warning,
+    log_error,
 )
 from libs.corelib.core import (
+    setup_environment,
     fetch_data,
-    get_todays_recipients,
-    save_recipients,
-    dispatch_messages_to_purohits,
-    dispatch_messages_to_recipients,
+    dispatch_messages,
     perform_cleanup,
-    dispatch_message_to_admins,
+    notify_admins,
 )
-
-RECIPIENTS = None
-
-
-def setup_environment() -> bool:
-    """
-    Performs configurations and sets up the environment.
-    """
-    frame = inspect.currentframe()
-    try:
-        configure_directories()
-        backup_existing_logs()
-        configure_logging_system()
-        log_debug(f"{get_function_name(frame)} successful.")
-        return True
-    except Exception as e:
-        print(e)
-        log_error(f"{get_function_name(frame)} unsuccessful.")
-        return False
 
 
 def main() -> bool:
     """Execute the daily messaging workflow."""
-    log_debug("Script started.")
+    is_success = setup_environment() and fetch_data() and dispatch_messages()
 
-    if not setup_environment():
-        log_error("Environment setup failed.")
-        return False
-
-    if not fetch_data():
-        log_error("Failed to fetch data.")
-        return False
-
-    recipients = get_todays_recipients()
-    if not save_recipients(recipients):
-        log_error("Failed to save recipients.")
-        return False
-
-    global RECIPIENTS
-    RECIPIENTS = recipients
-
-    if dispatch_messages_to_purohits(recipients):
-        log_info("Reminders sent successfully.")
-    else:
-        log_error("Failed to send reminders to purohits.")
-
-    if dispatch_messages_to_recipients(recipients):
-        log_info("Messages sent to recipients successfully.")
+    if is_success:
+        log_debug("Successfully executed the automation.")
         return True
-
-    log_error("Failed to send messages to recipients.")
-    return False
+    else:
+        log_error("Failure in Automation.")
+        return False
 
 
 if __name__ == "__main__":
-    success = main()
-    dispatch_message_to_admins(RECIPIENTS)
+    is_success = main()
+    if not notify_admins(is_success):
+        log_warning("Failed to notify certain admins")
+
+    log_debug("Notified all admins.")
     perform_cleanup()
-    log_debug(f"Script ended. success={success}")
-    log_debug("\n\n\n")
+    log_debug("End of Script.\n\n\n")

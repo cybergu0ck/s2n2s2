@@ -18,9 +18,9 @@ from libs.corelib.core import (
     fetch_data,
     get_todays_recipients,
     save_recipients,
-    dispatch_messages_to_purohits,
+    dispatch_reminders,
     perform_cleanup,
-    dispatch_message_to_admins,
+    notify_admins,
 )
 
 RECIPIENTS = None
@@ -51,7 +51,7 @@ def main():
             global RECIPIENTS
             RECIPIENTS = get_todays_recipients()
             if save_recipients(RECIPIENTS):
-                if dispatch_messages_to_purohits(RECIPIENTS):
+                if dispatch_reminders(RECIPIENTS):
                     log_debug("Reminder script completed successfully.")
                     return
     log_error("Reminder script completed unsuccessfully.")
@@ -59,6 +59,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # dispatch_message_to_admins(RECIPIENTS)
+    # notify_admins(RECIPIENTS)
     perform_cleanup()
     log_debug("\n\n\n")
