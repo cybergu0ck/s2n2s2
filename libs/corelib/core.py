@@ -566,6 +566,7 @@ def notify_admins(is_success) -> bool:
                         log_warning(
                             f"Failed to send email to {admin.name} with email {admin.email}."
                         )
+        log_debug("Notified all admins.")
         return True
 
     except Exception as e:
