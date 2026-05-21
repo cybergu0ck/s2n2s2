@@ -120,7 +120,7 @@ def populate_header_to_column_mapping() -> bool:
             INTERNALHEADER_TO_COLUMNID[sheetsheader_to_internalreference[header]] = (
                 col_id
             )
-        log_debug("Successfully mapped header,column.")
+        log_debug("Successfully mapped header,column.\n")
         return True
     except Exception as e:
         frame = inspect.currentframe()
@@ -238,18 +238,21 @@ def get_todays_recipients() -> list:
 
 
 def log_todays_recipients(recipients):
-    log_debug("\n\n")
-    if len(recipients) == 0:
+    num_recipients = len(recipients)
+    if num_recipients == 0:
         info = "List of recipients : Empty"
         log_debug(info)
     else:
         log_debug("List of recipients :")
+
         for index, recipient in enumerate(recipients, start=1):
             name = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_NAME] - 1
             ]
-            log_debug(f"{index}.{name}")
-    log_debug("\n\n")
+            if index != num_recipients:
+                log_debug(f"{index}.{name}")
+            else:
+                log_debug(f"{index}.{name}\n")
 
 
 def get_header_row():
@@ -316,7 +319,7 @@ def dispatch_messages_to_recipients(recipients) -> bool:
     Sends SMS and Email to the list of recipients.
     """
     try:
-        for recipient in recipients:
+        for index, recipient in enumerate(recipients):
             title = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_TITLE] - 1
             ]
@@ -343,7 +346,8 @@ def dispatch_messages_to_recipients(recipients) -> bool:
             language = recipient[
                 INTERNALHEADER_TO_COLUMNID[SheetsHeader.REGISTERED_LANGUAGE] - 1
             ]
-            log_debug("\n")
+            if index != 0:
+                log_debug("\n")
             log_debug(
                 f"Recipient, Name: {title} {name}, Phone : {phone_num}, Email : {email_address}, Gotra : {gotra}, Rashi : {rashi}, Nakshatra : {nakshatra}."
             )
@@ -381,6 +385,7 @@ def dispatch_messages_to_recipients(recipients) -> bool:
                         )
                         # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
             time.sleep(5)
+        log_debug(" ")
         log_debug("Successfully dispatched all recipient messages.")
         return True
 
@@ -397,9 +402,9 @@ def dispatch_reminders(recipients) -> bool:
     Send message to purohits and admins
     """
     try:
-        log_debug("\n")
-        for purohit in PUROHITS:
-            log_debug("\n")
+        for index, purohit in enumerate(PUROHITS):
+            if index != 0:
+                log_debug("\n")
             if PI_MODE and ENABLE_SMS:
                 message = get_message_for_purohit(recipients)
                 phone_number = format_phone_number(purohit.phone_number)
@@ -430,6 +435,7 @@ def dispatch_reminders(recipients) -> bool:
                         )
 
         for admin in ADMINS:
+            log_debug(" ")
             if PI_MODE and ENABLE_SMS:
                 message = get_message_for_purohit(recipients)  # Intentional
                 phone_number = format_phone_number(admin.phone_number)
@@ -443,7 +449,7 @@ def dispatch_reminders(recipients) -> bool:
                     )
                     # TODO - Add some fail safe mechansim where all unsuccessfull parties are collected and informed to admin
         log_debug(
-            "Successfully dispatched necessary reminders to purohits and admins.\n\n"
+            "Successfully dispatched necessary reminders to purohits and admins.\n"
         )
         return True
 
@@ -498,7 +504,7 @@ def fetch_data() -> bool:
     process_data()
 
     if is_success:
-        log_debug("Successfully fetched necessary data.")
+        log_debug("Successfully fetched necessary data.\n")
         return True
     else:
         log_warning("Failed to fetch certain necessary data.")
@@ -530,8 +536,9 @@ def notify_admins(is_success) -> bool:
     Sends notification email to admins.
     """
     try:
-        for admin in ADMINS:
-            log_debug("\n\n")
+        for index, admin in enumerate(ADMINS):
+            if index != 0:
+                log_debug("\n")
             log_debug(
                 f"Admin, Name: {admin.name}, Phone : {admin.phone_number}, Email : {admin.email}."
             )

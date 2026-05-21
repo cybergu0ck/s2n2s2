@@ -28,7 +28,7 @@ def main() -> bool:
     is_success = setup_environment() and fetch_data() and dispatch_messages()
 
     if is_success:
-        log_debug("Successfully executed the automation.")
+        log_debug("Successfully executed the automation.\n")
         return True
     else:
         log_error("Failure in Automation.")
